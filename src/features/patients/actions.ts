@@ -5,7 +5,7 @@ import { requireProfessionalId } from "@/lib/auth";
 import { patientSchema } from "@/validations/patient";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { Gender } from "@prisma/client";
+import { Gender } from "@/generated/prisma/client";
 
 export async function createPatient(formData: FormData) {
   const professionalId = await requireProfessionalId();

@@ -6,7 +6,7 @@ import { visitSchema } from "@/validations/visit";
 import { calculateBodyComposition, calculateAge } from "@/lib/calculations/body-composition";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Gender } from "@prisma/client";
+import type { Gender } from "@/generated/prisma/client";
 
 function toFloat(val: unknown): number | null {
   if (val === "" || val === undefined || val === null) return null;

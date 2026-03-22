@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { MealType } from "@prisma/client";
+import { MealType } from "@/generated/prisma/client";
 
 interface MealOptionInput {
   foodId?: string;

@@ -5,7 +5,7 @@ import { requireProfessionalId } from "@/lib/auth";
 import { foodSchema } from "@/validations/food";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { FoodCategory } from "@prisma/client";
+import { FoodCategory } from "@/generated/prisma/client";
 
 export async function createFood(formData: FormData) {
   const professionalId = await requireProfessionalId();
