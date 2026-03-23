@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ReportConfig } from "@/components/report/report-config";
 
 export default async function ReportPage({
   params,
@@ -22,49 +21,26 @@ export default async function ReportPage({
 
   if (!patient) notFound();
 
+  const lastVisit = patient.visits[0];
+  const lastPlan = patient.mealPlans[0];
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Report PDF</h1>
-      <p className="text-muted-foreground">{patient.name}</p>
+      <div>
+        <h1 className="text-2xl font-bold">Report PDF</h1>
+        <p className="text-muted-foreground">{patient.name}</p>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Genera Report</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Il report includerà: composizione corporea, piano alimentare,
-            esempio settimanale, integratori, indicazioni dietetiche e ricette.
-          </p>
-
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Ultima visita</span>
-              <span>
-                {patient.visits[0]
-                  ? patient.visits[0].date.toLocaleDateString("it-IT")
-                  : "Nessuna visita"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Ultimo piano</span>
-              <span>
-                {patient.mealPlans[0]
-                  ? patient.mealPlans[0].name || "Piano senza nome"
-                  : "Nessun piano"}
-              </span>
-            </div>
-          </div>
-
-          {/* TODO: Implementare generazione PDF con Playwright */}
-          <Button disabled className="w-full">
-            Genera PDF (in arrivo)
-          </Button>
-          <p className="text-center text-xs text-muted-foreground">
-            La generazione PDF con Playwright sarà implementata nella Fase 7.
-          </p>
-        </CardContent>
-      </Card>
+      <ReportConfig
+        patientId={patientId}
+        patientName={patient.name}
+        hasVisit={!!lastVisit}
+        hasMealPlan={!!lastPlan}
+        lastVisitDate={
+          lastVisit ? lastVisit.date.toLocaleDateString("it-IT") : null
+        }
+        lastPlanName={lastPlan ? (lastPlan.name ?? "Piano senza nome") : null}
+      />
     </div>
   );
 }
