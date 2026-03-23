@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NutriPlan
 
-## Getting Started
+Gestionale SaaS per nutrizionisti. Gestisce pazienti, visite con misure antropometriche (plicometria JP3/JP7, circonferenze), database alimenti, piani dietetici, report PDF, ricette, integratori e istruzioni dietetiche.
 
-First, run the development server:
+## Stack
+
+- **Next.js 15** App Router + TypeScript
+- **Tailwind CSS v4** + shadcn/ui v2
+- **PostgreSQL** + Prisma ORM
+- **Supabase Auth**
+- **Playwright** per generazione PDF
+- **SheetJS** per import Excel
+
+## Setup
 
 ```bash
+npm install
+cp .env.example .env   # configurare le variabili
+npx prisma generate
+npx prisma migrate dev
+npx prisma db seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variabili d'ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Vedi `.env.example`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `DATABASE_URL` — connection string PostgreSQL
+- `NEXT_PUBLIC_SUPABASE_URL` — URL progetto Supabase
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — chiave anonima Supabase
 
-## Learn More
+## Funzionalita'
 
-To learn more about Next.js, take a look at the following resources:
+- **Pazienti**: anagrafica, condizioni, storico visite e piani dieta
+- **Visite**: plicometria 7 siti, circonferenze 11 siti, calcolo automatico composizione corporea (JP3/JP7, Siri, BMI)
+- **Alimenti**: database 282 alimenti con flag allergie (FODMAP, nichel, glutine, lattosio)
+- **Piani dieta**: wizard 4-step con calcolo metabolismo, distribuzione pasti, selezione alimenti, esempio settimanale. 3 varianti kcal (riposo, allenamento 1, allenamento 2)
+- **Report PDF**: 7 sezioni selezionabili, grafici SVG (donut composizione, trend peso), generato con Playwright
+- **Ricette**: ingredienti dinamici con autocomplete alimenti e calcolo kcal automatico
+- **Integratori**: libreria integratori + assegnazione per paziente con dosaggio/timing personalizzato
+- **Istruzioni dietetiche**: indicazioni per categoria con ordinamento
+- **Import Excel**: importazione da fogli Excel del nutrizionista (alimenti, misure, ricette, istruzioni)
+- **Settings**: profilo professionista con statistiche
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Migrazione dati da SQLite
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx tsx scripts/migrate-sqlite.ts <path-to-sqlite.db> <professionalId>
+# Flag --dry-run per verifica conteggi senza inserimento
+```
