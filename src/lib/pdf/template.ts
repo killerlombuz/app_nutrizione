@@ -156,6 +156,8 @@ function buildDonutSvg(fatPct: number): string {
   const fatY = cy - r * Math.cos(fatRad);
   const fatLargeArc = fatAngle > 180 ? 1 : 0;
 
+
+
   return `
     <svg width="160" height="190" viewBox="0 0 160 190">
       <!-- Lean mass arc (full circle background) -->
@@ -286,6 +288,8 @@ function buildCover(data: ReportData): string {
 function buildMeasurements(data: ReportData): string {
   if (data.visits.length === 0) return '';
   const latest = data.visits[0];
+
+
 
   let html = '<h2>Composizione Corporea</h2>';
 
