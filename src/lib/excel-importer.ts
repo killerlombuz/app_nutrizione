@@ -88,16 +88,24 @@ export async function importExcel(
     errors: [],
   };
 
-  // --- 1. Import Foods from MB sheet ---
+  // --- 1. Import Foods from MB sheet (upsert) ---
   if (wb.SheetNames.includes("MB")) {
     const ws = wb.Sheets["MB"];
 
-    // Existing food names for dedup
-    const existing = await prisma.food.findMany({
-      where: { OR: [{ professionalId }, { professionalId: null }] },
+    // Carica nomi esistenti per separare create da update
+    const existingFoods = await prisma.food.findMany({
+      where: { professionalId },
       select: { name: true },
     });
-    const existingNames = new Set(existing.map((f) => f.name.toLowerCase()));
+    const existingFoodNames = new Set(existingFoods.map((f) => f.name.toLowerCase()));
+
+    type FoodData = {
+      professionalId: string; name: string; category: FoodCategory;
+      kcalPer100g: number; fatG: number; satFatG: number;
+      carbG: number; sugarG: number; proteinG: number; fiberG: number;
+    };
+    const toCreate: FoodData[] = [];
+    const toUpdate: FoodData[] = [];
 
     for (let row = 3; row <= 310; row++) {
       const name = safeStr(cell(ws, row, 31));
@@ -112,9 +120,8 @@ export async function importExcel(
       const fiber = safeFloat(cell(ws, row, 38)) ?? 0;
 
       if (kcal === 0 && fat === 0 && carb === 0 && protein === 0) continue;
-      if (existingNames.has(name.toLowerCase())) continue;
 
-      let category: FoodCategory | null = "ALTRO";
+      let category: FoodCategory = "ALTRO";
       for (const [rmin, rmax, cat] of CATEGORY_RANGES) {
         if (row >= rmin && row <= rmax) {
           category = FOOD_CATEGORY_MAP[cat] ?? "ALTRO";
@@ -122,26 +129,31 @@ export async function importExcel(
         }
       }
 
-      try {
-        await prisma.food.create({
-          data: {
-            professionalId,
-            name,
-            category,
-            kcalPer100g: kcal,
-            fatG: fat,
-            satFatG: satFat,
-            carbG: carb,
-            sugarG: sugar,
-            proteinG: protein,
-            fiberG: fiber,
-          },
-        });
-        existingNames.add(name.toLowerCase());
-        result.foods++;
-      } catch (e) {
-        result.errors.push(`Alimento "${name}": ${e instanceof Error ? e.message : String(e)}`);
+      const data: FoodData = { professionalId, name, category, kcalPer100g: kcal, fatG: fat, satFatG: satFat, carbG: carb, sugarG: sugar, proteinG: protein, fiberG: fiber };
+      if (existingFoodNames.has(name.toLowerCase())) {
+        toUpdate.push(data);
+      } else {
+        toCreate.push(data);
       }
+    }
+
+    try {
+      // Crea nuovi con una sola query
+      if (toCreate.length > 0) {
+        await prisma.food.createMany({ data: toCreate, skipDuplicates: true });
+      }
+      // Aggiorna esistenti in parallelo (senza transazione per evitare timeout)
+      await Promise.all(
+        toUpdate.map((f) =>
+          prisma.food.update({
+            where: { professionalId_name: { professionalId, name: f.name } },
+            data: { category: f.category, kcalPer100g: f.kcalPer100g, fatG: f.fatG, satFatG: f.satFatG, carbG: f.carbG, sugarG: f.sugarG, proteinG: f.proteinG, fiberG: f.fiberG },
+          })
+        )
+      );
+      result.foods = toCreate.length + toUpdate.length;
+    } catch (e) {
+      result.errors.push(`Alimenti: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -171,20 +183,34 @@ export async function importExcel(
 
     if (clientName) {
       try {
-        const patient = await prisma.patient.create({
-          data: {
-            professionalId,
-            name: clientName,
-            birthDate,
-            heightCm,
-            gender,
-          },
+        // Upsert paziente per nome
+        let patient = await prisma.patient.findFirst({
+          where: { professionalId, name: { equals: clientName, mode: "insensitive" } },
         });
-        result.patients++;
 
-        // Import measurements
+        if (patient) {
+          patient = await prisma.patient.update({
+            where: { id: patient.id },
+            data: { birthDate, heightCm, gender },
+          });
+        } else {
+          patient = await prisma.patient.create({
+            data: { professionalId, name: clientName, birthDate, heightCm, gender },
+          });
+          result.patients++;
+        }
+
+        // Upsert misure per data
         const plicCols = [6, 9, 12, 15, 18, 21, 24];
         const circCols = [28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58];
+
+        const existingVisits = await prisma.visit.findMany({
+          where: { patientId: patient.id },
+          select: { id: true, date: true },
+        });
+        const visitByDate = new Map(
+          existingVisits.map((v) => [v.date.toISOString().slice(0, 10), v.id])
+        );
 
         for (let row = 7; row <= 50; row++) {
           const dateVal = cell(ws, row, 1);
@@ -202,33 +228,24 @@ export async function importExcel(
 
           const plics = plicCols.map((c) => safeFloat(cell(ws, row, c), null));
           const circs = circCols.map((c) => safeFloat(cell(ws, row, c), null));
+          const visitData = {
+            weightKg: safeFloat(weightVal),
+            plicChest: plics[0], plicTricep: plics[1], plicAxillary: plics[2],
+            plicSubscapular: plics[3], plicSuprailiac: plics[4], plicAbdominal: plics[5],
+            plicThigh: plics[6], circNeck: circs[0], circChest: circs[1],
+            circArmRelaxed: circs[2], circArmFlexed: circs[3], circWaist: circs[4],
+            circLowerAbdomen: circs[5], circHips: circs[6], circUpperThigh: circs[7],
+            circMidThigh: circs[8], circLowerThigh: circs[9], circCalf: circs[10],
+          };
 
-          await prisma.visit.create({
-            data: {
-              patientId: patient.id,
-              date,
-              weightKg: safeFloat(weightVal),
-              plicChest: plics[0],
-              plicTricep: plics[1],
-              plicAxillary: plics[2],
-              plicSubscapular: plics[3],
-              plicSuprailiac: plics[4],
-              plicAbdominal: plics[5],
-              plicThigh: plics[6],
-              circNeck: circs[0],
-              circChest: circs[1],
-              circArmRelaxed: circs[2],
-              circArmFlexed: circs[3],
-              circWaist: circs[4],
-              circLowerAbdomen: circs[5],
-              circHips: circs[6],
-              circUpperThigh: circs[7],
-              circMidThigh: circs[8],
-              circLowerThigh: circs[9],
-              circCalf: circs[10],
-            },
-          });
-          result.measurements++;
+          const dateKey = date.toISOString().slice(0, 10);
+          const existingId = visitByDate.get(dateKey);
+          if (existingId) {
+            await prisma.visit.update({ where: { id: existingId }, data: visitData });
+          } else {
+            await prisma.visit.create({ data: { patientId: patient.id, date, ...visitData } });
+            result.measurements++;
+          }
         }
       } catch (e) {
         result.errors.push(`Paziente: ${e instanceof Error ? e.message : String(e)}`);
@@ -240,6 +257,12 @@ export async function importExcel(
   if (wb.SheetNames.includes("Ricette_opz partic.")) {
     const ws = wb.Sheets["Ricette_opz partic."];
     const recipeStarts = [4, 14, 24, 34, 44, 54, 64, 74, 84, 94, 104, 114, 124];
+
+    const existingRecipes = await prisma.recipe.findMany({
+      where: { professionalId },
+      select: { id: true, name: true },
+    });
+    const existingRecipeMap = new Map(existingRecipes.map((r) => [r.name.toLowerCase(), r.id]));
 
     for (const startRow of recipeStarts) {
       const name = safeStr(cell(ws, startRow, 10));
@@ -265,23 +288,37 @@ export async function importExcel(
         }
       }
 
+      const ingredientData = ingredients.map((ing, i) => ({
+        foodName: ing.foodName,
+        grams: ing.grams,
+        sortOrder: i,
+      }));
+
       try {
-        await prisma.recipe.create({
-          data: {
-            professionalId,
-            name,
-            totalKcal,
-            kcalPerPortion,
-            ingredients: {
-              create: ingredients.map((ing, i) => ({
-                foodName: ing.foodName,
-                grams: ing.grams,
-                sortOrder: i,
-              })),
+        const existingId = existingRecipeMap.get(name.toLowerCase());
+        if (existingId) {
+          // Aggiorna: sostituisce ingredienti
+          await prisma.recipeIngredient.deleteMany({ where: { recipeId: existingId } });
+          await prisma.recipe.update({
+            where: { id: existingId },
+            data: {
+              totalKcal,
+              kcalPerPortion,
+              ingredients: { create: ingredientData },
             },
-          },
-        });
-        result.recipes++;
+          });
+        } else {
+          await prisma.recipe.create({
+            data: {
+              professionalId,
+              name,
+              totalKcal,
+              kcalPerPortion,
+              ingredients: { create: ingredientData },
+            },
+          });
+          result.recipes++;
+        }
       } catch (e) {
         result.errors.push(`Ricetta "${name}": ${e instanceof Error ? e.message : String(e)}`);
       }
@@ -298,30 +335,38 @@ export async function importExcel(
       ["EMERGENZE DOLCI", 64, 70],
     ];
 
-    let sortOrder = 0;
+    const existingInstructions = await prisma.dietaryInstruction.findMany({
+      where: { professionalId },
+      select: { id: true, category: true },
+    });
+    const existingInstructionMap = new Map(existingInstructions.map((i) => [i.category, i.id]));
+
+    let sortOrder = existingInstructions.length;
     for (const [category, start, end] of sections) {
       const lines: string[] = [];
       for (let row = start; row <= end; row++) {
         const val = safeStr(cell(ws, row, 1));
         if (val) lines.push(val);
       }
+      if (lines.length === 0) continue;
 
-      if (lines.length > 0) {
-        try {
+      const content = lines.join("\n");
+      try {
+        const existingId = existingInstructionMap.get(category);
+        if (existingId) {
+          await prisma.dietaryInstruction.update({
+            where: { id: existingId },
+            data: { content, title: category },
+          });
+        } else {
           await prisma.dietaryInstruction.create({
-            data: {
-              professionalId,
-              category,
-              title: category,
-              content: lines.join("\n"),
-              sortOrder,
-            },
+            data: { professionalId, category, title: category, content, sortOrder },
           });
           result.instructions++;
           sortOrder++;
-        } catch (e) {
-          result.errors.push(`Istruzione "${category}": ${e instanceof Error ? e.message : String(e)}`);
         }
+      } catch (e) {
+        result.errors.push(`Istruzione "${category}": ${e instanceof Error ? e.message : String(e)}`);
       }
     }
   }

@@ -29,9 +29,9 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthPage =
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/register");
+  const isLoginPage = request.nextUrl.pathname.startsWith("/login");
+  const isRegisterPage = request.nextUrl.pathname.startsWith("/register");
+  const isAuthPage = isLoginPage || isRegisterPage;
 
   if (!user && !isAuthPage) {
     const url = request.nextUrl.clone();
@@ -39,7 +39,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthPage) {
+  // Solo /login viene bloccata per utenti già autenticati.
+  // /register resta accessibile: serve per completare il profilo Professional.
+  if (user && isLoginPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
