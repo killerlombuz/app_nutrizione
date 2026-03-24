@@ -21,12 +21,17 @@ export default async function NewVisitPage({
   const boundAction = createVisit.bind(null, patientId);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Nuova Visita</h1>
-        <p className="text-muted-foreground">{patient.name}</p>
-      </div>
-      <VisitForm action={boundAction} />
-    </div>
+    <VisitForm
+      action={boundAction}
+      patient={{
+        id: patient.id,
+        name: patient.name,
+        gender: patient.gender as "M" | "F" | null,
+        heightCm: patient.heightCm,
+        birthDate: patient.birthDate?.toISOString() ?? null,
+      }}
+      cancelHref={`/patients/${patientId}`}
+      description="Raccogli misure, pliche e circonferenze in un'unica schermata con anteprima dei principali indicatori."
+    />
   );
 }

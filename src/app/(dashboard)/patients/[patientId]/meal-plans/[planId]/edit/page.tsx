@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { WizardContainer } from "@/components/meal-plans/wizard/wizard-container";
-import type { WizardState, WizardMeal } from "@/components/meal-plans/wizard/wizard-container";
+import type {
+  WizardMeal,
+  WizardState,
+} from "@/components/meal-plans/wizard/wizard-container";
 
 export default async function EditMealPlanPage({
   params,
@@ -35,7 +38,6 @@ export default async function EditMealPlanPage({
     prisma.sportActivity.findMany({ orderBy: { name: "asc" } }),
   ]);
 
-  // Convert DB data to wizard state
   const meals: Record<string, WizardMeal> = {};
   for (const template of plan.mealTemplates) {
     meals[template.mealType] = {
@@ -82,18 +84,21 @@ export default async function EditMealPlanPage({
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Modifica Piano Dieta</h1>
-        <p className="text-muted-foreground">{patient.name}</p>
-      </div>
-      <WizardContainer
-        patientId={patientId}
-        planId={planId}
-        activityLevels={activityLevels}
-        sportActivities={sportActivities}
-        initialState={initialState}
-      />
-    </div>
+    <WizardContainer
+      patientId={patientId}
+      planId={planId}
+      patient={{
+        name: patient.name,
+        gender: patient.gender as "M" | "F" | null,
+        heightCm: patient.heightCm,
+        birthDate: patient.birthDate?.toISOString() ?? null,
+      }}
+      cancelHref={`/patients/${patientId}/meal-plans/${planId}`}
+      title="Modifica Piano Dieta"
+      description={`Aggiorna struttura, alimenti e scenari del piano del ${plan.date.toLocaleDateString("it-IT")}.`}
+      activityLevels={activityLevels}
+      sportActivities={sportActivities}
+      initialState={initialState}
+    />
   );
 }

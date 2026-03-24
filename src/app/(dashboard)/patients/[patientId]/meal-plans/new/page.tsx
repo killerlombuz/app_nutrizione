@@ -22,16 +22,17 @@ export default async function NewMealPlanPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Nuovo Piano Dieta</h1>
-        <p className="text-muted-foreground">{patient.name}</p>
-      </div>
-      <WizardContainer
-        patientId={patientId}
-        activityLevels={activityLevels}
-        sportActivities={sportActivities}
-      />
-    </div>
+    <WizardContainer
+      patientId={patientId}
+      patient={{
+        name: patient.name,
+        gender: patient.gender as "M" | "F" | null,
+        heightCm: patient.heightCm,
+        birthDate: patient.birthDate?.toISOString() ?? null,
+      }}
+      cancelHref={`/patients/${patientId}`}
+      activityLevels={activityLevels}
+      sportActivities={sportActivities}
+    />
   );
 }
