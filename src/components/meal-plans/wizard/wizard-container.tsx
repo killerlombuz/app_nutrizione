@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 
 
@@ -103,9 +103,9 @@ export function WizardContainer({
   });
   const [saving, setSaving] = useState(false);
 
-  function updateState(partial: Partial<WizardState>) {
+  const updateState = useCallback((partial: Partial<WizardState>) => {
     setState((prev) => ({ ...prev, ...partial }));
-  }
+  }, []);
 
   async function handleSave() {
     setSaving(true);

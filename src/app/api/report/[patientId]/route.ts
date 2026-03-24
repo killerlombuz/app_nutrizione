@@ -20,7 +20,7 @@ export async function GET(
     : ALL_SECTIONS;
 
   try {
-    const data = await loadReportData(patientId, professionalId);
+    const data = await loadReportData(patientId, professionalId, sections);
     const pdf = await generatePdf(data, sections);
 
     const filename = `report_${data.patient.name.replace(/\s+/g, '_')}.pdf`;

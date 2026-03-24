@@ -19,8 +19,8 @@ export default async function PatientDetailPage({
   const patient = await prisma.patient.findFirst({
     where: { id: patientId, professionalId },
     include: {
-      visits: { orderBy: { date: "desc" } },
-      mealPlans: { orderBy: { createdAt: "desc" } },
+      visits: { orderBy: { date: "desc" }, take: 20 },
+      mealPlans: { orderBy: { createdAt: "desc" }, take: 10 },
       conditions: true,
       supplements: { include: { supplement: true } },
     },

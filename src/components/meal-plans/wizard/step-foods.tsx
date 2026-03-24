@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -154,17 +154,28 @@ export function StepFoods({ state, updateState }: StepFoodsProps) {
     });
   }
 
-  const activeMeals = MEAL_TYPES.filter((mt) => {
-    const pctMap: Record<string, number> = {
-      COLAZIONE: state.pctBreakfast,
-      SPUNTINO_MATTINA: state.pctSnack1,
-      PRANZO: state.pctLunch,
-      SPUNTINO_POMERIGGIO: state.pctSnack2,
-      CENA: state.pctDinner,
-      SPUNTINO_SERA: state.pctSnack3,
-    };
-    return (pctMap[mt] ?? 0) > 0;
-  });
+  const activeMeals = useMemo(
+    () =>
+      MEAL_TYPES.filter((mt) => {
+        const pctMap: Record<string, number> = {
+          COLAZIONE: state.pctBreakfast,
+          SPUNTINO_MATTINA: state.pctSnack1,
+          PRANZO: state.pctLunch,
+          SPUNTINO_POMERIGGIO: state.pctSnack2,
+          CENA: state.pctDinner,
+          SPUNTINO_SERA: state.pctSnack3,
+        };
+        return (pctMap[mt] ?? 0) > 0;
+      }),
+    [
+      state.pctBreakfast,
+      state.pctSnack1,
+      state.pctLunch,
+      state.pctSnack2,
+      state.pctDinner,
+      state.pctSnack3,
+    ]
+  );
 
   return (
     <div className="space-y-6">

@@ -100,7 +100,7 @@ model Visit {
 
   createdAt DateTime @default(now())
 
-  @@index([patientId])
+  @@index([patientId, date])
   @@map("visits")
 }
 
@@ -301,6 +301,7 @@ model Recipe {
 
   ingredients RecipeIngredient[]
 
+  @@index([professionalId, name])
   @@map("recipes")
 }
 
