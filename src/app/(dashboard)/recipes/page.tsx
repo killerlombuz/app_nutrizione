@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -11,6 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
+import { MetricCard } from "@/components/layout/metric-card";
+import { BookOpenText, CookingPot, Plus } from "lucide-react";
 
 export default async function RecipesPage() {
   const professionalId = await requireProfessionalId();
@@ -28,16 +31,47 @@ export default async function RecipesPage() {
     orderBy: { name: "asc" },
   });
 
+  const totalIngredients = recipes.reduce(
+    (sum, recipe) => sum + recipe._count.ingredients,
+    0
+  );
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Ricette ({recipes.length})</h1>
-        <Button render={<Link href="/recipes/new" />}>+ Nuova Ricetta</Button>
+      <PageHeader
+        eyebrow="Pianificazione"
+        title="Ricette"
+        description="Archivio ricette e combinazioni alimentari riusabili nella pratica clinica."
+        action={
+          <Button render={<Link href="/recipes/new" />}>
+            <Plus className="size-4" />
+            Nuova Ricetta
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <MetricCard
+          label="Ricette archiviate"
+          value={recipes.length}
+          hint="template disponibili"
+          icon={BookOpenText}
+          tone="emerald"
+        />
+        <MetricCard
+          label="Ingredienti totali"
+          value={totalIngredients}
+          hint="sommatoria dei componenti ricetta"
+          icon={CookingPot}
+          tone="amber"
+        />
       </div>
 
-      <Card>
-        <CardHeader />
-        <CardContent>
+      <Card className="bg-white/[0.78]">
+        <CardHeader>
+          <CardTitle>Archivio ricette</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-2">
           {recipes.length === 0 ? (
             <p className="py-8 text-center text-muted-foreground">
               Nessuna ricetta. Crea la prima!
@@ -65,15 +99,15 @@ export default async function RecipesPage() {
                       </Link>
                     </TableCell>
                     <TableCell className="text-right">
-                      {recipe.totalKcal ? Math.round(recipe.totalKcal) : "—"}
+                      {recipe.totalKcal ? Math.round(recipe.totalKcal) : "-"}
                     </TableCell>
                     <TableCell className="text-right">
                       {recipe.kcalPerPortion
                         ? Math.round(recipe.kcalPerPortion)
-                        : "—"}
+                        : "-"}
                     </TableCell>
                     <TableCell className="text-right">
-                      {recipe.portions ?? "—"}
+                      {recipe.portions ?? "-"}
                     </TableCell>
                     <TableCell className="text-right">
                       {recipe._count.ingredients}

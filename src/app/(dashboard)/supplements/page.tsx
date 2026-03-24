@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -11,6 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
+import { MetricCard } from "@/components/layout/metric-card";
+import { Pill, Plus, TimerReset } from "lucide-react";
 
 export default async function SupplementsPage() {
   const professionalId = await requireProfessionalId();
@@ -20,20 +23,44 @@ export default async function SupplementsPage() {
     orderBy: { name: "asc" },
   });
 
+  const withTiming = supplements.filter((item) => item.timing).length;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">
-          Integratori ({supplements.length})
-        </h1>
-        <Button render={<Link href="/supplements/new" />}>
-          + Nuovo Integratore
-        </Button>
+      <PageHeader
+        eyebrow="Pianificazione"
+        title="Integratori"
+        description="Libreria di supplementi da riutilizzare nelle schede paziente e nei protocolli."
+        action={
+          <Button render={<Link href="/supplements/new" />}>
+            <Plus className="size-4" />
+            Nuovo Integratore
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <MetricCard
+          label="Integratori"
+          value={supplements.length}
+          hint="elementi disponibili in libreria"
+          icon={Pill}
+          tone="emerald"
+        />
+        <MetricCard
+          label="Con timing definito"
+          value={withTiming}
+          hint="slot con momento di assunzione gia' valorizzato"
+          icon={TimerReset}
+          tone="cobalt"
+        />
       </div>
 
-      <Card>
-        <CardHeader />
-        <CardContent>
+      <Card className="bg-white/[0.78]">
+        <CardHeader>
+          <CardTitle>Libreria integratori</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-2">
           {supplements.length === 0 ? (
             <p className="py-8 text-center text-muted-foreground">
               Nessun integratore. Crea il primo!
@@ -59,10 +86,10 @@ export default async function SupplementsPage() {
                         {s.name}
                       </Link>
                     </TableCell>
-                    <TableCell>{s.defaultDosage ?? "—"}</TableCell>
-                    <TableCell>{s.timing ?? "—"}</TableCell>
+                    <TableCell>{s.defaultDosage ?? "-"}</TableCell>
+                    <TableCell>{s.timing ?? "-"}</TableCell>
                     <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
-                      {s.description ?? "—"}
+                      {s.description ?? "-"}
                     </TableCell>
                   </TableRow>
                 ))}

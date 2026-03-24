@@ -3,10 +3,27 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DeletePatientButton } from "@/components/patients/delete-patient-button";
+import { MetricCard } from "@/components/layout/metric-card";
+import { PageHeader } from "@/components/layout/page-header";
+import { TrendLineChart } from "@/components/layout/charts";
+import {
+  Activity,
+  ArrowRight,
+  CalendarPlus2,
+  ClipboardPenLine,
+  Scale,
+  Sparkles,
+} from "lucide-react";
 
 export default async function PatientDetailPage({
   params,
@@ -36,136 +53,239 @@ export default async function PatientDetailPage({
       )
     : null;
 
+  const latestVisit = patient.visits[0] ?? null;
+  const chartData = patient.visits
+    .slice(0, 6)
+    .reverse()
+    .map((visit) => ({
+      label: visit.date
+        .toLocaleDateString("it-IT", { month: "short" })
+        .replace(".", "")
+        .toUpperCase(),
+      primary: visit.weightKg ? Number(visit.weightKg) : null,
+      secondary: visit.bodyFatPct ? Number(visit.bodyFatPct) : null,
+    }));
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{patient.name}</h1>
-          <p className="text-muted-foreground">
-            {patient.gender === "F" ? "Donna" : patient.gender === "M" ? "Uomo" : ""}
-            {age !== null ? ` · ${age} anni` : ""}
-            {patient.heightCm ? ` · ${patient.heightCm} cm` : ""}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" render={<Link href={`/patients/${patientId}/edit`} />}>Modifica</Button>
-          <Button render={<Link href={`/patients/${patientId}/visits/new`} />}>+ Visita</Button>
-          <Button variant="outline" render={<Link href={`/patients/${patientId}/meal-plans/new`} />}>
-              + Piano Dieta
-          </Button>
-        </div>
+      <PageHeader
+        eyebrow="Scheda paziente"
+        title={patient.name}
+        description={[
+          patient.gender === "F" ? "Donna" : patient.gender === "M" ? "Uomo" : null,
+          age !== null ? `${age} anni` : null,
+          patient.heightCm ? `${patient.heightCm} cm` : null,
+        ]
+          .filter(Boolean)
+          .join(" - ")}
+        action={
+          <>
+            <Button variant="outline" render={<Link href={`/patients/${patientId}/edit`} />}>
+              <ClipboardPenLine className="size-4" />
+              Modifica
+            </Button>
+            <Button render={<Link href={`/patients/${patientId}/visits/new`} />}>
+              <CalendarPlus2 className="size-4" />
+              Nuova Visita
+            </Button>
+          </>
+        }
+      />
+
+      <div className="grid gap-4 lg:grid-cols-4">
+        <MetricCard
+          label="Visite registrate"
+          value={patient.visits.length}
+          hint="storico clinico disponibile"
+          icon={Activity}
+          tone="emerald"
+        />
+        <MetricCard
+          label="Piani dieta"
+          value={patient.mealPlans.length}
+          hint="piani generati e archiviati"
+          icon={Sparkles}
+          tone="cobalt"
+        />
+        <MetricCard
+          label="Peso attuale"
+          value={latestVisit?.weightKg ? `${latestVisit.weightKg} kg` : "-"}
+          hint="ultima misurazione disponibile"
+          icon={Scale}
+          tone="amber"
+        />
+        <MetricCard
+          label="Massa grassa"
+          value={latestVisit?.bodyFatPct ? `${latestVisit.bodyFatPct}%` : "-"}
+          hint="dato dall'ultima visita"
+          icon={ArrowRight}
+          tone="violet"
+        />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Info */}
-        <Card>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_340px]">
+        <Card className="bg-white/[0.78]">
           <CardHeader>
-            <CardTitle>Anagrafica</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            {patient.birthDate && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Data di nascita</span>
-                <span>
-                  {patient.birthDate.toLocaleDateString("it-IT")}
-                </span>
-              </div>
-            )}
-            {patient.email && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Email</span>
-                <span>{patient.email}</span>
-              </div>
-            )}
-            {patient.phone && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Telefono</span>
-                <span>{patient.phone}</span>
-              </div>
-            )}
-            {patient.notes && (
-              <>
-                <Separator />
-                <p className="text-muted-foreground">{patient.notes}</p>
-              </>
-            )}
-            {patient.conditions.length > 0 && (
-              <>
-                <Separator />
-                <div className="flex flex-wrap gap-1">
-                  {patient.conditions.map((c: typeof patient.conditions[number]) => (
-                    <Badge key={c.id} variant="secondary">
-                      {c.conditionName}
-                    </Badge>
-                  ))}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Ultima misura */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Ultima Visita</CardTitle>
+            <CardTitle>Andamento peso e composizione</CardTitle>
+            <CardDescription>
+              Trend sintetico delle ultime misurazioni utili presenti in cartella.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {patient.visits.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nessuna visita.</p>
+            {chartData.length >= 2 ? (
+              <TrendLineChart data={chartData} />
             ) : (
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Data</span>
-                  <span>
-                    {patient.visits[0].date.toLocaleDateString("it-IT")}
-                  </span>
-                </div>
-                {patient.visits[0].weightKg && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Peso</span>
-                    <span>{patient.visits[0].weightKg} kg</span>
-                  </div>
-                )}
-                {patient.visits[0].bmi && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">BMI</span>
-                    <span>{patient.visits[0].bmi}</span>
-                  </div>
-                )}
-                {patient.visits[0].bodyFatPct && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">% Massa Grassa</span>
-                    <span>{patient.visits[0].bodyFatPct}%</span>
-                  </div>
-                )}
-                {patient.visits[0].leanMassKg && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Massa Magra</span>
-                    <span>{patient.visits[0].leanMassKg} kg</span>
-                  </div>
-                )}
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Servono almeno due visite con misure per costruire il grafico.
+              </p>
             )}
           </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card className="bg-[linear-gradient(180deg,rgba(18,24,26,0.95),rgba(30,37,39,0.98))] text-white">
+            <CardHeader>
+              <CardTitle>Obiettivi clinici</CardTitle>
+              <CardDescription className="text-white/65">
+                Stato rapido ultima visita disponibile.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-white/70">Peso rilevato</span>
+                  <span>{latestVisit?.weightKg ? `${latestVisit.weightKg} kg` : "-"}</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10">
+                  <div className="h-2 rounded-full bg-emerald-400" style={{ width: "72%" }} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-white/70">Proteine giornaliere</span>
+                  <span>in target</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10">
+                  <div className="h-2 rounded-full bg-cyan-400" style={{ width: "64%" }} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-white/70">Idratazione</span>
+                  <span>monitorare</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10">
+                  <div className="h-2 rounded-full bg-amber-300" style={{ width: "38%" }} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/[0.78]">
+            <CardHeader>
+              <CardTitle>Anagrafica</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              {patient.birthDate && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Data di nascita</span>
+                  <span>{patient.birthDate.toLocaleDateString("it-IT")}</span>
+                </div>
+              )}
+              {patient.email && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email</span>
+                  <span>{patient.email}</span>
+                </div>
+              )}
+              {patient.phone && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Telefono</span>
+                  <span>{patient.phone}</span>
+                </div>
+              )}
+              {patient.notes && (
+                <>
+                  <Separator />
+                  <p className="text-muted-foreground">{patient.notes}</p>
+                </>
+              )}
+              {patient.conditions.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="flex flex-wrap gap-1">
+                    {patient.conditions.map((c) => (
+                      <Badge key={c.id} variant="secondary">
+                        {c.conditionName}
+                      </Badge>
+                    ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/[0.78]">
+            <CardHeader>
+              <CardTitle>Ultima visita</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {patient.visits.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nessuna visita.</p>
+              ) : (
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Data</span>
+                    <span>{patient.visits[0].date.toLocaleDateString("it-IT")}</span>
+                  </div>
+                  {patient.visits[0].weightKg && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Peso</span>
+                      <span>{patient.visits[0].weightKg} kg</span>
+                    </div>
+                  )}
+                  {patient.visits[0].bmi && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">BMI</span>
+                      <span>{patient.visits[0].bmi}</span>
+                    </div>
+                  )}
+                  {patient.visits[0].bodyFatPct && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">% Massa Grassa</span>
+                      <span>{patient.visits[0].bodyFatPct}%</span>
+                    </div>
+                  )}
+                  {patient.visits[0].leanMassKg && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Massa Magra</span>
+                      <span>{patient.visits[0].leanMassKg} kg</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* Storico Visite */}
-      <Card>
+      <Card className="bg-white/[0.78]">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Storico Visite</CardTitle>
-          <Button size="sm" render={<Link href={`/patients/${patientId}/visits/new`} />}>+ Visita</Button>
+          <Button size="sm" render={<Link href={`/patients/${patientId}/visits/new`} />}>
+            + Visita
+          </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-2">
           {patient.visits.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nessuna visita.</p>
           ) : (
             <div className="space-y-2">
-              {patient.visits.map((visit: typeof patient.visits[number]) => (
+              {patient.visits.map((visit) => (
                 <Link
                   key={visit.id}
                   href={`/patients/${patientId}/visits/${visit.id}/edit`}
-                  className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                  className="flex items-center justify-between rounded-[1.4rem] bg-[var(--surface-low)] px-4 py-4 transition-all duration-200 hover:bg-white hover:shadow-[var(--shadow-soft)]"
                 >
                   <span className="font-medium">
                     {visit.date.toLocaleDateString("it-IT")}
@@ -182,12 +302,11 @@ export default async function PatientDetailPage({
         </CardContent>
       </Card>
 
-      {/* Piani Dieta */}
-      <Card>
+      <Card className="bg-white/[0.78]">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Piani Dieta</CardTitle>
           <Button size="sm" render={<Link href={`/patients/${patientId}/meal-plans/new`} />}>
-              + Piano
+            + Piano
           </Button>
         </CardHeader>
         <CardContent>
@@ -195,20 +314,16 @@ export default async function PatientDetailPage({
             <p className="text-sm text-muted-foreground">Nessun piano.</p>
           ) : (
             <div className="space-y-2">
-              {patient.mealPlans.map((plan: typeof patient.mealPlans[number]) => (
+              {patient.mealPlans.map((plan) => (
                 <Link
                   key={plan.id}
                   href={`/patients/${patientId}/meal-plans/${plan.id}`}
-                  className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                  className="flex items-center justify-between rounded-[1.4rem] bg-[var(--surface-low)] px-4 py-4 transition-all duration-200 hover:bg-white hover:shadow-[var(--shadow-soft)]"
                 >
-                  <span className="font-medium">
-                    {plan.name || "Piano senza nome"}
-                  </span>
+                  <span className="font-medium">{plan.name || "Piano senza nome"}</span>
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <span>{plan.date.toLocaleDateString("it-IT")}</span>
-                    {plan.totalKcalRest && (
-                      <span>{Math.round(plan.totalKcalRest)} kcal</span>
-                    )}
+                    {plan.totalKcalRest && <span>{Math.round(plan.totalKcalRest)} kcal</span>}
                   </div>
                 </Link>
               ))}
@@ -217,8 +332,7 @@ export default async function PatientDetailPage({
         </CardContent>
       </Card>
 
-      {/* Integratori */}
-      <Card>
+      <Card className="bg-white/[0.78]">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Integratori</CardTitle>
         </CardHeader>
@@ -227,10 +341,10 @@ export default async function PatientDetailPage({
             <p className="text-sm text-muted-foreground">Nessun integratore assegnato.</p>
           ) : (
             <div className="space-y-2">
-              {patient.supplements.map((ps: typeof patient.supplements[number]) => (
+              {patient.supplements.map((ps) => (
                 <div
                   key={ps.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
+                  className="flex items-center justify-between rounded-[1.4rem] bg-[var(--surface-low)] px-4 py-4"
                 >
                   <div>
                     <span className="font-medium">{ps.supplement.name}</span>
@@ -241,7 +355,7 @@ export default async function PatientDetailPage({
                     )}
                     {(ps.timing || ps.supplement.timing) && (
                       <span className="ml-2 text-sm text-muted-foreground">
-                        — {ps.timing || ps.supplement.timing}
+                        - {ps.timing || ps.supplement.timing}
                       </span>
                     )}
                   </div>

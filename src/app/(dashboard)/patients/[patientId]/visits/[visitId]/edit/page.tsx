@@ -49,18 +49,20 @@ export default async function EditVisitPage({
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Modifica Visita</h1>
-        <p className="text-muted-foreground">
-          {patient.name} — {visit.date.toLocaleDateString("it-IT")}
-        </p>
-      </div>
-      <VisitForm
-        action={boundAction}
-        defaultValues={defaults}
-        submitLabel="Aggiorna"
-      />
-    </div>
+    <VisitForm
+      action={boundAction}
+      patient={{
+        id: patient.id,
+        name: patient.name,
+        gender: patient.gender as "M" | "F" | null,
+        heightCm: patient.heightCm,
+        birthDate: patient.birthDate?.toISOString() ?? null,
+      }}
+      cancelHref={`/patients/${patientId}`}
+      defaultValues={defaults}
+      submitLabel="Aggiorna visita"
+      title="Modifica Visita"
+      description={`Aggiorna i dati raccolti nella visita del ${visit.date.toLocaleDateString("it-IT")}.`}
+    />
   );
 }
