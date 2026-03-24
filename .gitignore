@@ -40,4 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Claude Code local settings (may contain secrets)
+.claude/settings.local.json
+
 /src/generated/prisma
