@@ -18,7 +18,9 @@
       "Read(//c/_Git/Claude/test/**)",
       "Bash(node -e \":*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code}\")"
     ],
     "additionalDirectories": [
       "c:\\_Git\\Claude\\app_nutrizione\\src\\app\\(dashboard)\\recipes\\[recipeId]",

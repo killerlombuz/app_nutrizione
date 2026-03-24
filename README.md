@@ -1,51 +1,60 @@
 # NutriPlan
 
-Gestionale SaaS per nutrizionisti. Gestisce pazienti, visite con misure antropometriche (plicometria JP3/JP7, circonferenze), database alimenti, piani dietetici, report PDF, ricette, integratori e istruzioni dietetiche.
+Gestionale SaaS per nutrizionisti costruito con Next.js, Prisma e Supabase. Copre pazienti, visite antropometriche, database alimenti, piani dieta, report PDF, ricette, integratori e istruzioni dietetiche.
 
 ## Stack
 
-- **Next.js 15** App Router + TypeScript
-- **Tailwind CSS v4** + shadcn/ui v2
-- **PostgreSQL** + Prisma ORM
-- **Supabase Auth**
-- **Playwright** per generazione PDF
-- **SheetJS** per import Excel
+- Next.js 16 App Router + TypeScript
+- React 19
+- Tailwind CSS 4
+- componenti UI locali su `@base-ui/react`
+- PostgreSQL + Prisma
+- Supabase Auth
+- Playwright per PDF
+- SheetJS per import Excel
+
+## Stato progetto
+
+Il redesign grafico principale e' in corso sul branch `feat/ui-refresh-stitch` ed e' gia' stato applicato a:
+- shell applicativa
+- dashboard e pagine core
+- nuova visita
+- wizard piano dieta
+
+Dettagli operativi in `UI_REFRESH_PLAN.md`.
 
 ## Setup
 
 ```bash
 npm install
-cp .env.example .env   # configurare le variabili
 npx prisma generate
 npx prisma migrate dev
 npx prisma db seed
 npm run dev
 ```
 
-## Variabili d'ambiente
+Configurare `.env` con:
+- `DATABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-Vedi `.env.example`:
-
-- `DATABASE_URL` — connection string PostgreSQL
-- `NEXT_PUBLIC_SUPABASE_URL` — URL progetto Supabase
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — chiave anonima Supabase
-
-## Funzionalita'
+## Funzionalita principali
 
 - **Pazienti**: anagrafica, condizioni, storico visite e piani dieta
-- **Visite**: plicometria 7 siti, circonferenze 11 siti, calcolo automatico composizione corporea (JP3/JP7, Siri, BMI)
-- **Alimenti**: database 282 alimenti con flag allergie (FODMAP, nichel, glutine, lattosio)
-- **Piani dieta**: wizard 4-step con calcolo metabolismo, distribuzione pasti, selezione alimenti, esempio settimanale. 3 varianti kcal (riposo, allenamento 1, allenamento 2)
-- **Report PDF**: 7 sezioni selezionabili, grafici SVG (donut composizione, trend peso), generato con Playwright
-- **Ricette**: ingredienti dinamici con autocomplete alimenti e calcolo kcal automatico
-- **Integratori**: libreria integratori + assegnazione per paziente con dosaggio/timing personalizzato
-- **Istruzioni dietetiche**: indicazioni per categoria con ordinamento
-- **Import Excel**: importazione da fogli Excel del nutrizionista (alimenti, misure, ricette, istruzioni)
-- **Settings**: profilo professionista con statistiche
+- **Visite**: plicometria 7 siti, circonferenze 11 siti, calcolo automatico composizione corporea
+- **Alimenti**: database alimenti con categorie e ricerca
+- **Piani dieta**: wizard 4-step con metabolismo, distribuzione, selezione alimenti e riepilogo
+- **Report PDF**: generazione tramite endpoint dedicato e Playwright
+- **Ricette**: ingredienti dinamici e calcolo kcal
+- **Integratori**: libreria integratori e assegnazione paziente
+- **Istruzioni dietetiche**: raccolta di indicazioni riusabili
+- **Import**: caricamento dati da Excel
 
-## Migrazione dati da SQLite
+## Verifiche rapide
 
 ```bash
-npx tsx scripts/migrate-sqlite.ts <path-to-sqlite.db> <professionalId>
-# Flag --dry-run per verifica conteggi senza inserimento
+npm run lint
+npm run build
 ```
+
+Nota: Next 16 segnala ancora la deprecazione di `middleware.ts` verso `proxy`.

@@ -1,81 +1,105 @@
-# CLAUDE.md — NutriPlan (Next.js)
+# CLAUDE.md - NutriPlan
 
 @AGENTS.md
 
 ## Progetto
 
-NutriPlan: gestionale SaaS per nutrizionisti.
+NutriPlan e' un gestionale SaaS per nutrizionisti.
 
-Gestisce: pazienti, visite con misure antropometriche (plicometria JP3/JP7, circonferenze), database 282 alimenti, piani dietetici con wizard 4-step, report PDF, ricette, integratori, istruzioni dietetiche.
+Copre:
+- pazienti e anagrafica clinica
+- visite con misure antropometriche, plicometria JP3/JP7 e circonferenze
+- database alimenti
+- piani dieta con wizard a 4 step
+- report PDF
+- ricette, integratori e istruzioni dietetiche
 
-## Stack
+## Stack corrente
 
 | Componente | Tecnologia |
 |-----------|-----------|
-| Frontend | Next.js 15 App Router + TypeScript |
-| UI | Tailwind CSS v4 + shadcn/ui v2 (@base-ui/react) |
-| Database | PostgreSQL (Prisma Postgres) |
+| Frontend | Next.js 16 App Router + TypeScript |
+| Runtime UI | React 19 |
+| Styling | Tailwind CSS 4 |
+| UI Kit | componenti locali su `@base-ui/react` |
+| Database | PostgreSQL |
 | ORM | Prisma |
 | Auth | Supabase Auth |
-| PDF | Playwright (HTML/CSS -> PDF) |
-| Import | SheetJS (xlsx) per import Excel |
+| PDF | Playwright |
+| Import | SheetJS |
 | Validazione | Zod |
 
-## Avvio
+## Stato UI aggiornato
+
+Il branch `feat/ui-refresh-stitch` ha introdotto il redesign grafico basato sul progetto Stitch `projects/5524774794365872444` (`Lista Pazienti - NutriPlan`).
+
+Tranche completate:
+- shell applicativa, sidebar, header e token visuali
+- dashboard e pagine core (`patients`, dettaglio paziente, `foods`, `settings`)
+- workflow `Nuova Visita` e `Wizard Piano Dieta`
+
+Riferimenti principali:
+- `src/components/layout/*`
+- `src/components/visits/visit-form.tsx`
+- `src/components/meal-plans/wizard/*`
+- `UI_REFRESH_PLAN.md`
+
+## Avvio locale
 
 ```bash
 npm install
-# Configurare .env da .env.example (DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY)
 npx prisma generate
 npx prisma migrate dev
 npx prisma db seed
 npm run dev
 ```
 
-## Punti critici — Costanti scientifiche
+Configurare `.env` con almeno:
+- `DATABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-- **JP3 donna**: costante `1.10994921` (NON `1.0994921`) — file `src/lib/calculations/body-composition.ts`
-- **Siri donna JP3**: coefficiente `501` (NON `495`)
+## Vincoli scientifici
+
+- **JP3 donna**: costante `1.10994921` in `src/lib/calculations/body-composition.ts`
+- **Siri donna JP3**: coefficiente `501`
 - **JP7**: formula identica M/F, costante `1.112`
-- **BMR**: Katch-McArdle: `21.6 * FFM + 370`
-- **Grammi pasti**: verdure 200g + olio 10ml fissi, carbo 54%, proteine resto
-- **3 varianti kcal**: rest, workout1, workout2
+- **BMR**: Katch-McArdle `21.6 * FFM + 370`
+- **Meal planner**: verdure `200g` + olio `10ml` fissi, carbo `54%`, proteine sul resto
+- **Scenari kcal**: `rest`, `workout1`, `workout2`
 
-## Architettura
+## Note architetturali
 
-- **Server Actions** per tutte le mutazioni (`src/features/*/actions.ts`)
-- **Route Handlers** solo per API chiamate client-side (autocomplete alimenti, calcolo metabolismo, calcolo grammi, report PDF, import Excel)
-- **Multi-tenancy**: ogni entita' ha `professionalId` legato a Supabase Auth via modello `Professional`
-- **shadcn/ui v2**: usa `render` prop (NON `asChild`) per composizione componenti. Esempio: `<Button render={<Link href="..." />}>text</Button>`
-- **Enum PostgreSQL** in italiano per termini di dominio: `COLAZIONE`, `PRANZO`, `CENA`, `SPUNTINO_1`, `SPUNTINO_2`, `SPUNTINO_3`
+- Mutazioni via Server Actions in `src/features/*/actions.ts`
+- Route handlers usati solo per API client-side: autocomplete alimenti, metabolismo, report, import
+- Multi-tenancy tramite `professionalId`
+- I componenti UI usano `render` prop, non `asChild`
+- Il progetto usa naming di dominio italiano per molti enum (`COLAZIONE`, `PRANZO`, `CENA`, ...)
 
-## Struttura directory chiave
+## Struttura chiave
 
-```
+```text
 src/
-  app/(auth)/              — login, register
-  app/(dashboard)/         — tutte le pagine protette
-  app/api/                 — route handlers (foods, metabolism, grams, report, import)
-  components/ui/           — shadcn/ui v2
-  components/layout/       — sidebar, header
-  components/patients/     — form, delete button
-  components/visits/       — form misure
-  components/foods/        — form alimenti
-  components/meal-plans/wizard/ — 4 step + container
-  components/recipes/      — form ricette con ingredienti dinamici
-  components/supplements/  — form integratori
-  components/instructions/ — form istruzioni dietetiche
-  components/report/       — generatore PDF con selezione sezioni
-  components/settings/     — form profilo professionista
-  features/                — server actions (patients, visits, foods, meal-plans, recipes, supplements, instructions, settings)
-  lib/calculations/        — body-composition, metabolism, macros, meal-planner, sport
-  lib/pdf/                 — template HTML, data loader, generatore Playwright
-  lib/supabase/            — client, server, middleware
-  lib/excel-importer.ts    — import fogli Excel nutrizionista
-  validations/             — schemi Zod
+  app/(auth)/              login, register
+  app/(dashboard)/         pagine protette
+  app/api/                 route handlers
+  components/ui/           primitive UI
+  components/layout/       shell applicativa
+  components/visits/       workflow visita
+  components/meal-plans/   wizard piano dieta
+  components/report/       generazione PDF
+  features/                server actions
+  lib/calculations/        body composition, metabolismo, meal planner
+  lib/supabase/            client, server, middleware
+  validations/             schemi Zod
 prisma/
-  schema.prisma            — 17 modelli, enum PostgreSQL
-  seed.ts                  — activity levels, sport activities
+  schema.prisma
+  seed.ts
 scripts/
-  migrate-sqlite.ts        — migrazione dati da SQLite legacy
+  migrate-sqlite.ts
 ```
+
+## Note Next.js
+
+- Prima di modificare codice Next, leggere la documentazione locale in `node_modules/next/dist/docs/`
+- Il repository usa ancora `middleware.ts`; Next 16 segnala la deprecazione verso `proxy`, ma al momento build e runtime sono OK
