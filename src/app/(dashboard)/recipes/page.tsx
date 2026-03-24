@@ -17,8 +17,13 @@ export default async function RecipesPage() {
 
   const recipes = await prisma.recipe.findMany({
     where: { professionalId },
-    include: {
-      ingredients: { orderBy: { sortOrder: "asc" } },
+    select: {
+      id: true,
+      name: true,
+      totalKcal: true,
+      kcalPerPortion: true,
+      portions: true,
+      _count: { select: { ingredients: true } },
     },
     orderBy: { name: "asc" },
   });
@@ -71,7 +76,7 @@ export default async function RecipesPage() {
                       {recipe.portions ?? "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      {recipe.ingredients.length}
+                      {recipe._count.ingredients}
                     </TableCell>
                   </TableRow>
                 ))}

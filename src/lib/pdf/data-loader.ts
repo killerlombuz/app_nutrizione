@@ -3,12 +3,17 @@
  */
 
 import { prisma } from '@/lib/db';
-import type { ReportData } from './types';
+import type { ReportData, ReportSection } from './types';
 
 export async function loadReportData(
   patientId: string,
-  professionalId: string
+  professionalId: string,
+  sections?: ReportSection[]
 ): Promise<ReportData> {
+  const needsRecipes = !sections || sections.includes('recipes');
+  const needsInstructions = !sections || sections.includes('instructions');
+  const needsSupplements = !sections || sections.includes('supplements');
+
   const [professional, patient, visits, mealPlan, patientSupplements, instructions, recipes] =
     await Promise.all([
       prisma.professional.findUniqueOrThrow({
@@ -36,20 +41,26 @@ export async function loadReportData(
           },
         },
       }),
-      prisma.patientSupplement.findMany({
-        where: { patientId },
-        include: { supplement: true },
-      }),
-      prisma.dietaryInstruction.findMany({
-        where: { professionalId },
-        orderBy: { sortOrder: 'asc' },
-      }),
-      prisma.recipe.findMany({
-        where: { professionalId },
-        include: {
-          ingredients: { orderBy: { sortOrder: 'asc' } },
-        },
-      }),
+      needsSupplements
+        ? prisma.patientSupplement.findMany({
+            where: { patientId },
+            include: { supplement: true },
+          })
+        : Promise.resolve([]),
+      needsInstructions
+        ? prisma.dietaryInstruction.findMany({
+            where: { professionalId },
+            orderBy: { sortOrder: 'asc' },
+          })
+        : Promise.resolve([]),
+      needsRecipes
+        ? prisma.recipe.findMany({
+            where: { professionalId },
+            include: {
+              ingredients: { orderBy: { sortOrder: 'asc' } },
+            },
+          })
+        : Promise.resolve([]),
     ]);
 
   return {

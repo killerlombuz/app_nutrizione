@@ -3,9 +3,20 @@
  * Converte HTML template in PDF A4.
  */
 
-import { chromium } from 'playwright';
+import { chromium, type Browser } from 'playwright';
 import { buildReportHtml } from './template';
 import type { ReportData, ReportSection } from './types';
+
+// Singleton browser: evita il cold-start di Chromium ad ogni richiesta PDF.
+let _browser: Browser | null = null;
+
+async function getBrowser(): Promise<Browser> {
+  if (_browser && _browser.isConnected()) {
+    return _browser;
+  }
+  _browser = await chromium.launch({ headless: true });
+  return _browser;
+}
 
 export async function generatePdf(
   data: ReportData,
@@ -13,9 +24,9 @@ export async function generatePdf(
 ): Promise<Uint8Array> {
   const html = buildReportHtml(data, sections);
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await getBrowser();
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle' });
 
     const pdf = await page.pdf({
@@ -35,6 +46,6 @@ export async function generatePdf(
 
     return new Uint8Array(pdf);
   } finally {
-    await browser.close();
+    await page.close();
   }
 }
