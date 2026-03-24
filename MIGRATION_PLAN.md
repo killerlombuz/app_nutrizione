@@ -1,5 +1,14 @@
 # Piano di Migrazione: NutriPlan Flask → Next.js
 
+## Nota di stato
+
+Documento storico di migrazione.
+
+Aggiornamento al `2026-03-24`:
+- lo stack reale del repository e' ora su `Next.js 16`, `React 19`, `Tailwind 4`
+- il wizard dieta implementato nell'app corrente e' a `4 step`
+- il redesign grafico Stitch e' tracciato in `UI_REFRESH_PLAN.md`
+
 ## Contesto
 
 NutriPlan è un gestionale per nutrizionisti costruito in Flask + SQLite. Gestisce pazienti, visite con misure antropometriche (plicometria JP3/JP7, circonferenze), database di 282 alimenti, piani dietetici con wizard 5-step, e report PDF con ReportLab. L'app è usata durante visite reali e deve privilegiare velocità di inserimento dati, affidabilità dei calcoli scientifici e PDF professionali.

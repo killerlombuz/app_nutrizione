@@ -2,59 +2,55 @@
 
 ## Contesto
 
-Questo documento traccia il redesign grafico di NutriPlan basato sul progetto Stitch 2.0 gia' disponibile via MCP.
+Questo documento traccia il redesign grafico di NutriPlan basato sul progetto Stitch 2.0 raggiunto via MCP.
 
-- Branch di lavoro: `feat/ui-refresh-stitch`
+- Branch: `feat/ui-refresh-stitch`
 - Data avvio: `2026-03-24`
-- Progetto Stitch di riferimento: `projects/5524774794365872444`
-- Titolo progetto Stitch: `Lista Pazienti - NutriPlan`
+- Progetto Stitch: `projects/5524774794365872444`
+- Titolo progetto: `Lista Pazienti - NutriPlan`
+- PR verso `main`: `#4`
 
-## Materiale verificato
+## Riferimenti Stitch verificati
 
-Sono state verificate via MCP le schermate principali desktop e mobile:
+Schermate controllate via MCP:
+- dashboard
+- lista pazienti
+- dettaglio paziente
+- database alimenti
+- impostazioni
+- nuova visita
+- wizard piano dieta
+- report
+- nuove ricette
 
-- Dashboard
-- Lista pazienti
-- Dettaglio paziente
-- Wizard piano dieta
-- Database alimenti
-- Impostazioni
-- Nuova visita
-- Nuova ricetta
-- Report PDF
+Per i workflow complessi sono stati scaricati anche i riferimenti dedicati:
+- `Nuova Visita - NutriPlan` (`ac89b8bac56d438abaa7c79989231a2f`)
+- `Wizard Piano Dieta - NutriPlan` (`948a26507feb4b73aa0e8cf6fbac6cf0`)
 
 ## Obiettivo
 
-Portare l'interfaccia corrente verso il linguaggio visivo definito in Stitch:
+Portare l'app verso il linguaggio visivo Stitch:
+- shell piu' editoriale e meno CRUD generico
+- superfici tonali, gerarchia visiva e metriche piu' forti
+- componenti riusabili per le pagine cliniche
+- migliore resa responsive per dashboard e workflow lunghi
 
-- shell applicativa piu' editoriale e meno "CRUD generico"
-- gerarchia visiva piu' forte per pagine data-heavy
-- palette e superfici tonali coerenti con il tema "Clinical Atelier"
-- responsive reale per dashboard e navigazione
-- componenti base riutilizzabili per le viste del dominio
-
-## Vincoli tecnici
-
-- Stack reale del progetto: Next `16.2.1`, React `19.2.4`, Tailwind `4`
-- App Router in `src/app`
-- UI basata su componenti `@base-ui/react` + componenti locali stile shadcn
-- Nessuna modifica alla logica di dominio se non necessaria al supporto del nuovo layout
-
-## Strategia di implementazione
+## Strategia
 
 ### Fase 1 - Fondazione visiva
 
-- aggiornare font globali, token CSS e superfici
-- riallineare componenti base: `Button`, `Input`, `Card`, `Table`, `Badge`
-- introdurre pattern riusabili per header pagina, metriche e visualizzazioni leggere
+- token CSS
+- font, colori, ombre e superfici
+- restyle componenti base (`Button`, `Input`, `Card`, `Badge`, `Table`)
 
 ### Fase 2 - Shell applicativa
 
-- rifare sidebar, header e contenitore dashboard
-- introdurre navigazione mobile con sheet
-- migliorare densita', spaziatura e allineamento delle azioni ricorrenti
+- sidebar
+- header
+- contenitore dashboard
+- pattern condivisi per page header e metriche
 
-### Fase 3 - Pagine prioritarie
+### Fase 3 - Pagine core
 
 - dashboard
 - lista pazienti
@@ -62,36 +58,74 @@ Portare l'interfaccia corrente verso il linguaggio visivo definito in Stitch:
 - impostazioni
 - database alimenti
 
-### Fase 4 - Pagine secondarie
+### Fase 4 - Workflow complessi
 
-- ricette
-- integratori
-- istruzioni
-- import
-- report PDF
-
-### Fase 5 - Workflow complessi
-
-- wizard piano dieta
 - nuova visita
-- form lunghi e stati vuoti
+- wizard piano dieta
 
-## Criteri di review
+### Fase 5 - Rifiniture successive
 
-Ogni tranche deve essere revisionabile separatamente:
+- pagine secondarie ancora da riallineare al nuovo linguaggio
+- eventuale passaggio `middleware.ts` -> `proxy`
 
-1. design tokens e shell
-2. pagine prioritarie
-3. workflow complessi
-4. rifiniture responsive e verifiche finali
+## Implementazione completata
+
+### Fondazione e shell
+
+File chiave:
+- `src/app/layout.tsx`
+- `src/app/globals.css`
+- `src/components/layout/sidebar.tsx`
+- `src/components/layout/header.tsx`
+- `src/components/layout/page-header.tsx`
+- `src/components/layout/metric-card.tsx`
+
+### Pagine core migrate
+
+File chiave:
+- `src/app/(dashboard)/page.tsx`
+- `src/app/(dashboard)/patients/page.tsx`
+- `src/app/(dashboard)/patients/[patientId]/page.tsx`
+- `src/app/(dashboard)/foods/page.tsx`
+- `src/app/(dashboard)/settings/page.tsx`
+- allineamento iniziale di `recipes` e `supplements`
+
+### Workflow complessi migrati
+
+File chiave:
+- `src/components/visits/visit-form.tsx`
+- `src/app/(dashboard)/patients/[patientId]/visits/new/page.tsx`
+- `src/app/(dashboard)/patients/[patientId]/visits/[visitId]/edit/page.tsx`
+- `src/components/meal-plans/wizard/wizard-container.tsx`
+- `src/components/meal-plans/wizard/step-info.tsx`
+- `src/components/meal-plans/wizard/step-distribution.tsx`
+- `src/components/meal-plans/wizard/step-foods.tsx`
+- `src/components/meal-plans/wizard/step-summary.tsx`
+- `src/app/(dashboard)/patients/[patientId]/meal-plans/new/page.tsx`
+- `src/app/(dashboard)/patients/[patientId]/meal-plans/[planId]/edit/page.tsx`
+
+## Commit di riferimento
+
+- `3ea9e8c` `feat: redesign dashboard shell and core pages`
+- `47796d5` `feat: redesign visit and meal plan workflows`
+
+## Verifiche eseguite
+
+- `npm.cmd run lint`
+- `npm.cmd run build`
+
+Entrambe verdi sul branch di lavoro.
 
 ## Stato attuale
 
 - [x] Branch creato
 - [x] Progetto Stitch identificato via MCP
-- [x] Schermate principali ispezionate
-- [x] Gap analysis tra UI attuale e UI Stitch
-- [ ] Fondazione visiva implementata
-- [ ] Shell applicativa implementata
-- [ ] Pagine prioritarie migrate
-- [ ] Verifica lint/build eseguita
+- [x] Materiale grafico verificato
+- [x] Fondazione visiva implementata
+- [x] Shell applicativa implementata
+- [x] Pagine core migrate
+- [x] Nuova visita migrata
+- [x] Wizard piano dieta migrato
+- [x] Lint e build eseguiti
+- [ ] Rifiniture finali su pagine secondarie
+- [ ] Migrazione eventuale da `middleware.ts` a `proxy`
