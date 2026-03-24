@@ -52,7 +52,7 @@ export default async function InstructionsPage() {
                   </summary>
                   <div className="mt-2">
                     <InstructionForm
-                      action={(formData) => updateInstruction(instr.id, formData)}
+                      action={updateInstruction.bind(null, instr.id)}
                       defaultValues={instr}
                       submitLabel="Aggiorna"
                     />
