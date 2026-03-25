@@ -11,7 +11,7 @@ import type { ReportData, ReportSection } from './types';
 // URL del binario Chromium per ambienti serverless (Vercel).
 // Deve corrispondere alla major version di @sparticuz/chromium-min in package.json.
 const CHROMIUM_PACK_URL =
-  'https://github.com/nichochar/chromium-headless-shell-packed/releases/download/v143.0.0/chromium-headless-shell-v143.0.0-pack.tar';
+  'https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.x64.tar';
 
 // Singleton browser: evita il cold-start di Chromium ad ogni richiesta PDF.
 let _browser: Browser | null = null;
