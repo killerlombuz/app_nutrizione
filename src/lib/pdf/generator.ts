@@ -4,9 +4,14 @@
  */
 
 import { chromium, type Browser } from 'playwright-core';
-import chromiumBinary from '@sparticuz/chromium';
+import chromiumBinary from '@sparticuz/chromium-min';
 import { buildReportHtml } from './template';
 import type { ReportData, ReportSection } from './types';
+
+// URL del binario Chromium per ambienti serverless (Vercel).
+// Deve corrispondere alla major version di @sparticuz/chromium-min in package.json.
+const CHROMIUM_PACK_URL =
+  'https://github.com/nichochar/chromium-headless-shell-packed/releases/download/v143.0.0/chromium-headless-shell-v143.0.0-pack.tar';
 
 // Singleton browser: evita il cold-start di Chromium ad ogni richiesta PDF.
 let _browser: Browser | null = null;
@@ -18,7 +23,7 @@ async function getBrowser(): Promise<Browser> {
   try {
     _browser = await chromium.launch({
       args: chromiumBinary.args,
-      executablePath: await chromiumBinary.executablePath(),
+      executablePath: await chromiumBinary.executablePath(CHROMIUM_PACK_URL),
       headless: true,
     });
     return _browser;
