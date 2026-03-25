@@ -3,7 +3,8 @@
  * Converte HTML template in PDF A4.
  */
 
-import { chromium, type Browser } from 'playwright';
+import { chromium, type Browser } from 'playwright-core';
+import chromiumBinary from '@sparticuz/chromium';
 import { buildReportHtml } from './template';
 import type { ReportData, ReportSection } from './types';
 
@@ -15,7 +16,11 @@ async function getBrowser(): Promise<Browser> {
     return _browser;
   }
   try {
-    _browser = await chromium.launch({ headless: true });
+    _browser = await chromium.launch({
+      args: chromiumBinary.args,
+      executablePath: await chromiumBinary.executablePath(),
+      headless: true,
+    });
     return _browser;
   } catch (error) {
     throw new Error(
