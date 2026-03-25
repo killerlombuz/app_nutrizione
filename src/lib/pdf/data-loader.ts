@@ -14,7 +14,9 @@ export async function loadReportData(
   const needsInstructions = !sections || sections.includes('instructions');
   const needsSupplements = !sections || sections.includes('supplements');
 
-  const [professional, patient, visits, mealPlan, patientSupplements, instructions, recipes] =
+  let professional, patient, visits, mealPlan, patientSupplements, instructions, recipes;
+  try {
+  [professional, patient, visits, mealPlan, patientSupplements, instructions, recipes] =
     await Promise.all([
       prisma.professional.findUniqueOrThrow({
         where: { id: professionalId },
@@ -62,6 +64,13 @@ export async function loadReportData(
           })
         : Promise.resolve([]),
     ]);
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    if (code === 'P2025') {
+      throw new Error('Paziente o professionista non trovato. Verifica che i dati esistano nel sistema.');
+    }
+    throw error;
+  }
 
   return {
     professional,
