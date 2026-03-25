@@ -25,7 +25,7 @@ export async function GET(
 
     const filename = `report_${data.patient.name.replace(/\s+/g, '_')}.pdf`;
 
-    return new Response(pdf.buffer as ArrayBuffer, {
+    return new Response(Buffer.from(pdf), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}"`,
@@ -33,8 +33,9 @@ export async function GET(
     });
   } catch (error) {
     console.error('Errore generazione PDF:', error);
+    const message = error instanceof Error ? error.message : 'Errore nella generazione del report PDF';
     return NextResponse.json(
-      { error: 'Errore nella generazione del report PDF' },
+      { error: message },
       { status: 500 }
     );
   }

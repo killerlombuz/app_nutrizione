@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Activity, Calculator, Dumbbell, Flame, NotebookPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +41,29 @@ export function StepInfo({
   const [sport2Id, setSport2Id] = useState("");
   const [sport2Duration, setSport2Duration] = useState(60);
   const [loading, setLoading] = useState(false);
+
+  // Auto-derive numVariants from sport selections and clear stale state
+  useEffect(() => {
+    const computed = sport2Id ? 3 : sport1Id ? 2 : 1;
+    const updates: Partial<WizardState> = {};
+
+    if (computed !== state.numVariants) {
+      updates.numVariants = computed;
+    }
+    if (computed < 3) {
+      updates.totalKcalWorkout2 = 0;
+      updates.workout2Name = "";
+      updates.workout2Kcal = 0;
+    }
+    if (computed < 2) {
+      updates.totalKcalWorkout1 = 0;
+      updates.workout1Name = "";
+      updates.workout1Kcal = 0;
+    }
+    if (Object.keys(updates).length > 0) {
+      updateState(updates);
+    }
+  }, [sport1Id, sport2Id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scenarios = useMemo(
     () => [
@@ -95,7 +118,6 @@ export function StepInfo({
         workout1Kcal: Math.round(data.sport1Kcal),
         workout2Name: sport2?.name ?? "",
         workout2Kcal: Math.round(data.sport2Kcal),
-        numVariants: sport2Id ? 3 : sport1Id ? 2 : 1,
       });
     }
 
@@ -128,19 +150,9 @@ export function StepInfo({
             </div>
             <div className="space-y-2">
               <Label>Varianti</Label>
-              <Select
-                value={String(state.numVariants)}
-                onValueChange={(value) => updateState({ numVariants: parseInt(value ?? "1", 10) })}
-              >
-                <SelectTrigger className="h-11 w-full rounded-2xl bg-white/[0.88] px-4">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 scenario</SelectItem>
-                  <SelectItem value="2">2 scenari</SelectItem>
-                  <SelectItem value="3">3 scenari</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex h-11 items-center rounded-2xl bg-white/[0.88] px-4 text-sm text-muted-foreground">
+                {state.numVariants} scenario{state.numVariants > 1 ? "i" : ""}
+              </div>
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label>Note interne</Label>
@@ -197,7 +209,11 @@ export function StepInfo({
                 <div className="mt-4 space-y-3">
                   <Select value={sport1Id} onValueChange={(value) => setSport1Id(value ?? "")}>
                     <SelectTrigger className="h-11 w-full rounded-2xl bg-white px-4">
-                      <SelectValue placeholder="Nessuno" />
+                      <SelectValue placeholder="Nessuno">
+                        {(value: string | null) =>
+                          value ? sportActivities.find((s) => s.id === value)?.name ?? "Nessuno" : "Nessuno"
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {sportActivities.map((sport) => (
@@ -228,7 +244,11 @@ export function StepInfo({
                 <div className="mt-4 space-y-3">
                   <Select value={sport2Id} onValueChange={(value) => setSport2Id(value ?? "")}>
                     <SelectTrigger className="h-11 w-full rounded-2xl bg-white px-4">
-                      <SelectValue placeholder="Nessuno" />
+                      <SelectValue placeholder="Nessuno">
+                        {(value: string | null) =>
+                          value ? sportActivities.find((s) => s.id === value)?.name ?? "Nessuno" : "Nessuno"
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {sportActivities.map((sport) => (

@@ -14,8 +14,14 @@ async function getBrowser(): Promise<Browser> {
   if (_browser && _browser.isConnected()) {
     return _browser;
   }
-  _browser = await chromium.launch({ headless: true });
-  return _browser;
+  try {
+    _browser = await chromium.launch({ headless: true });
+    return _browser;
+  } catch (error) {
+    throw new Error(
+      `Impossibile avviare il browser per la generazione PDF: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 }
 
 export async function generatePdf(

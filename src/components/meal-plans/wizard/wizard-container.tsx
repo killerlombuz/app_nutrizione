@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Save, Sparkles, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, Save, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +71,7 @@ interface WizardContainerProps {
   activityLevels: { id: string; name: string; bmrMultiplier: number }[];
   sportActivities: { id: string; name: string; kcalPerHourPerKg: number; defaultDurationMin: number }[];
   initialState?: Partial<WizardState>;
+  isInherited?: boolean;
 }
 
 const STEP_META = [
@@ -122,6 +123,7 @@ export function WizardContainer({
   activityLevels,
   sportActivities,
   initialState,
+  isInherited,
 }: WizardContainerProps) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<WizardState>({
@@ -257,6 +259,13 @@ export function WizardContainer({
           </Button>
         </div>
       </section>
+
+      {isInherited && (
+        <div className="flex items-center gap-2 rounded-2xl bg-amber-50 px-5 py-3 text-sm text-amber-800 ring-1 ring-amber-200">
+          <Info className="size-4 shrink-0" />
+          Dati pre-compilati dal piano precedente. Modifica liberamente.
+        </div>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="rounded-[1.9rem] bg-white/[0.75] p-4 shadow-[var(--shadow-soft)] ring-1 ring-black/5">
