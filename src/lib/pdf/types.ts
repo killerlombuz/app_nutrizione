@@ -59,6 +59,8 @@ export interface ReportMealPlan {
   totalKcalRest: number | null;
   totalKcalWorkout1: number | null;
   totalKcalWorkout2: number | null;
+  proteinTargetMin: number | null;
+  proteinTargetMax: number | null;
   workout1Name: string | null;
   workout1Kcal: number | null;
   workout2Name: string | null;
@@ -69,6 +71,7 @@ export interface ReportMealPlan {
   pctSnack1: number;
   pctSnack2: number;
   pctSnack3: number;
+  notes: string | null;
   meals: ReportMeal[];
 }
 
@@ -78,6 +81,7 @@ export interface ReportMeal {
   kcalRest: number | null;
   kcalWorkout1: number | null;
   kcalWorkout2: number | null;
+  notes: string | null;
   options: ReportMealOption[];
   weeklyExamples: ReportWeeklyExample[];
 }
@@ -118,6 +122,7 @@ export interface ReportRecipe {
   totalKcal: number | null;
   kcalPerPortion: number | null;
   portions: number | null;
+  notes?: string | null;
   ingredients: { foodName: string | null; grams: number | null }[];
 }
 
