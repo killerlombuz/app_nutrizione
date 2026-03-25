@@ -21,13 +21,16 @@ async function getBrowser(): Promise<Browser> {
     return _browser;
   }
   try {
+    const execPath = await chromiumBinary.executablePath(CHROMIUM_PACK_URL);
+    console.log('[PDF] Chromium executable path:', execPath);
     _browser = await chromium.launch({
       args: chromiumBinary.args,
-      executablePath: await chromiumBinary.executablePath(CHROMIUM_PACK_URL),
+      executablePath: execPath,
       headless: true,
     });
     return _browser;
   } catch (error) {
+    console.error('[PDF] Browser launch failed:', error);
     throw new Error(
       `Impossibile avviare il browser per la generazione PDF: ${error instanceof Error ? error.message : String(error)}`
     );
