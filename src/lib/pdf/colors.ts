@@ -1,21 +1,28 @@
 /**
  * Palette colori per report PDF nutrizionale.
- * Verde salvia / acquamarina / arancione caldo.
+ * Allineata ai token visuali del redesign Stitch dell'app.
  */
 
 export const PDF_COLORS = {
-  primary: '#6B8F71',       // Verde salvia
-  secondary: '#73BAAD',     // Acquamarina
-  accent: '#D9896C',        // Arancione caldo
-  dark: '#383C3F',          // Grigio antracite
-  text: '#333333',          // Testo principale
-  muted: '#808080',         // Testo secondario
-  light: '#F5F6F7',         // Sfondo chiaro
+  primary: '#0B7A55',
+  primaryDeep: '#08543B',
+  primarySoft: '#DEEBE4',
+  secondary: '#2563EB',
+  secondarySoft: '#EAF2FF',
+  accent: '#C88B3A',
+  accentSoft: '#F8EBD7',
+  dark: '#15201B',
+  text: '#24332C',
+  muted: '#66756D',
+  light: '#F4F7F5',
+  panel: '#FBFCFB',
+  surface: '#EEF3EF',
   white: '#FFFFFF',
-  tableHeader: '#6B8F71',   // Header tabelle (= primary)
-  tableAlt: '#F2F7F2',      // Riga alternata verde chiaro
-  border: '#D9D9D9',        // Bordi tabelle
-  success: '#4DB366',
-  warning: '#E6B333',
-  danger: '#CC4D4D',
+  tableHeader: '#EFF5F1',
+  tableAlt: '#F8FBF9',
+  border: '#D7DFDA',
+  chartGrid: '#D6DDD8',
+  success: '#0F9D6C',
+  warning: '#C88B3A',
+  danger: '#C24141',
 } as const;

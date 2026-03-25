@@ -113,6 +113,8 @@ export async function loadReportData(
           totalKcalRest: mealPlan.totalKcalRest,
           totalKcalWorkout1: mealPlan.totalKcalWorkout1,
           totalKcalWorkout2: mealPlan.totalKcalWorkout2,
+          proteinTargetMin: mealPlan.proteinTargetMin,
+          proteinTargetMax: mealPlan.proteinTargetMax,
           workout1Name: mealPlan.workout1Name,
           workout1Kcal: mealPlan.workout1Kcal,
           workout2Name: mealPlan.workout2Name,
@@ -123,12 +125,14 @@ export async function loadReportData(
           pctSnack1: mealPlan.pctSnack1,
           pctSnack2: mealPlan.pctSnack2,
           pctSnack3: mealPlan.pctSnack3,
+          notes: mealPlan.notes,
           meals: mealPlan.mealTemplates.map((mt) => ({
             mealType: mt.mealType,
             sortOrder: mt.sortOrder,
             kcalRest: mt.kcalRest,
             kcalWorkout1: mt.kcalWorkout1,
             kcalWorkout2: mt.kcalWorkout2,
+            notes: mt.notes,
             options: mt.options.map((o) => ({
               optionGroup: o.optionGroup,
               foodName: o.foodName,
@@ -164,6 +168,7 @@ export async function loadReportData(
       totalKcal: r.totalKcal,
       kcalPerPortion: r.kcalPerPortion,
       portions: r.portions,
+      notes: r.notes,
       ingredients: r.ingredients.map((ing) => ({
         foodName: ing.foodName,
         grams: ing.grams,
