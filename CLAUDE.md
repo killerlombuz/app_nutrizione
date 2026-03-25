@@ -49,15 +49,31 @@ Riferimenti principali:
 ```bash
 npm install
 npx prisma generate
-npx prisma migrate dev
+npx prisma db push
 npx prisma db seed
 npm run dev
 ```
 
-Configurare `.env` con almeno:
-- `DATABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+### Configurazione `.env`
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=sb_publishable_...
+DATABASE_URL="postgresql://<user>:<password>@<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://<user>:<password>@<region>.pooler.supabase.com:5432/postgres?sslmode=require"
+```
+
+Note:
+- `DATABASE_URL` usa il **Transaction pooler** (porta 6543, PgBouncer) — usata dall'app a runtime
+- `DIRECT_URL` usa il **Session pooler** (porta 5432) — usata da Prisma CLI per `db push` / `migrate`
+- **Non** usare l'host diretto (`db.<project>.supabase.co:5432`): la porta è spesso bloccata da firewall/VPN
+- Non aggiungere `sslmode=require` a `DATABASE_URL`: causa errori TLS con `@prisma/adapter-pg`
+
+### Note Prisma 7
+
+- Le connection URL vanno in `prisma.config.ts`, **non** in `schema.prisma` (`url`/`directUrl` rimossi dal DSL)
+- `prisma.config.ts` usa `DIRECT_URL` per le operazioni di schema (push/migrate)
+- Usare `npx prisma db push` al posto di `prisma migrate dev` per sincronizzare lo schema
 
 ## Vincoli scientifici
 
