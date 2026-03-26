@@ -22,6 +22,8 @@ export default async function EditRecipePage({
 
   if (!recipe) notFound();
 
+  const boundAction = updateRecipe.bind(null, recipeId);
+
   const defaultValues = {
     name: recipe.name,
     portions: recipe.portions,
@@ -40,7 +42,7 @@ export default async function EditRecipePage({
         <DeleteRecipeButton recipeId={recipeId} recipeName={recipe.name} />
       </div>
       <RecipeForm
-        action={(data) => updateRecipe(recipeId, data)}
+        action={boundAction}
         defaultValues={defaultValues}
         submitLabel="Aggiorna Ricetta"
       />

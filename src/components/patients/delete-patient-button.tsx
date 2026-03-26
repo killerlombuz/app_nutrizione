@@ -21,6 +21,7 @@ export function DeletePatientButton({
   patientName: string;
 }) {
   const [open, setOpen] = useState(false);
+  const deletePatientAction = deletePatient.bind(null, patientId);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -40,7 +41,7 @@ export function DeletePatientButton({
           <Button variant="outline" onClick={() => setOpen(false)}>
             Annulla
           </Button>
-          <form action={() => deletePatient(patientId)}>
+          <form action={deletePatientAction}>
             <Button type="submit" variant="destructive">
               Elimina
             </Button>

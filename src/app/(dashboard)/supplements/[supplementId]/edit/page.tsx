@@ -19,6 +19,8 @@ export default async function EditSupplementPage({
 
   if (!supplement) notFound();
 
+  const boundAction = updateSupplement.bind(null, supplementId);
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center justify-between">
@@ -29,7 +31,7 @@ export default async function EditSupplementPage({
         />
       </div>
       <SupplementForm
-        action={(formData) => updateSupplement(supplementId, formData)}
+        action={boundAction}
         defaultValues={supplement}
         submitLabel="Aggiorna Integratore"
       />
