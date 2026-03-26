@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { Bell, Search, Settings2 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { MobileSidebar } from "./sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PendingLink } from "@/components/navigation/pending-link";
 
 interface HeaderProps {
   professional: {
@@ -61,7 +61,14 @@ export async function Header({ professional }: HeaderProps) {
           <Button
             variant="ghost"
             size="icon-sm"
-            render={<Link href="/settings" aria-label="Apri impostazioni" />}
+            render={
+              <PendingLink
+                href="/settings"
+                tone="button"
+                pendingLabel="Apro le impostazioni"
+                aria-label="Apri impostazioni"
+              />
+            }
             className="hidden sm:inline-flex"
           >
             <Settings2 className="size-4" />

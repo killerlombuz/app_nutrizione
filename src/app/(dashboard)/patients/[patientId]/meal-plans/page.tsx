@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PendingLink } from "@/components/navigation/pending-link";
 
 export default async function MealPlansPage({
   params,
@@ -30,8 +30,16 @@ export default async function MealPlansPage({
           <h1 className="text-2xl font-bold">Piani Dieta</h1>
           <p className="text-muted-foreground">{patient.name}</p>
         </div>
-        <Button render={<Link href={`/patients/${patientId}/meal-plans/new`} />}>
-            + Nuovo Piano
+        <Button
+          render={
+            <PendingLink
+              href={`/patients/${patientId}/meal-plans/new`}
+              tone="button"
+              pendingLabel={`Apro un nuovo piano per ${patient.name}`}
+            />
+          }
+        >
+          + Nuovo Piano
         </Button>
       </div>
 
@@ -44,9 +52,11 @@ export default async function MealPlansPage({
       ) : (
         <div className="space-y-3">
           {plans.map((plan: typeof plans[number]) => (
-            <Link
+            <PendingLink
               key={plan.id}
               href={`/patients/${patientId}/meal-plans/${plan.id}`}
+              tone="panel"
+              pendingLabel={`Apro il piano ${plan.name || "senza nome"}`}
               className="block"
             >
               <Card className="transition-colors hover:bg-muted/50">
@@ -73,7 +83,7 @@ export default async function MealPlansPage({
                   </span>
                 </CardContent>
               </Card>
-            </Link>
+            </PendingLink>
           ))}
         </div>
       )}

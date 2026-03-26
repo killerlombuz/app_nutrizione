@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
 import { MetricCard } from "@/components/layout/metric-card";
+import { PendingLink } from "@/components/navigation/pending-link";
 import { Pill, Plus, TimerReset } from "lucide-react";
 
 export default async function SupplementsPage() {
@@ -32,7 +32,15 @@ export default async function SupplementsPage() {
         title="Integratori"
         description="Libreria di supplementi da riutilizzare nelle schede paziente e nei protocolli."
         action={
-          <Button render={<Link href="/supplements/new" />}>
+          <Button
+            render={
+              <PendingLink
+                href="/supplements/new"
+                tone="button"
+                pendingLabel="Apro la creazione dell'integratore"
+              />
+            }
+          >
             <Plus className="size-4" />
             Nuovo Integratore
           </Button>
@@ -79,12 +87,14 @@ export default async function SupplementsPage() {
                 {supplements.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell>
-                      <Link
+                      <PendingLink
                         href={`/supplements/${s.id}/edit`}
+                        tone="text"
+                        pendingLabel={`Apro la modifica di ${s.name}`}
                         className="font-medium text-primary hover:underline"
                       >
                         {s.name}
-                      </Link>
+                      </PendingLink>
                     </TableCell>
                     <TableCell>{s.defaultDosage ?? "-"}</TableCell>
                     <TableCell>{s.timing ?? "-"}</TableCell>

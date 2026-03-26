@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Info, Save, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { StepFoods } from "./step-foods";
 import { StepInfo } from "./step-info";
 import { StepSummary } from "./step-summary";
 import { saveMealPlan, updateMealPlan } from "@/features/meal-plans/actions";
+import { PendingLink } from "@/components/navigation/pending-link";
 
 export interface WizardFood {
   foodId: string;
@@ -249,7 +249,16 @@ export function WizardContainer({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="outline" render={<Link href={cancelHref} />}>
+          <Button
+            variant="outline"
+            render={
+              <PendingLink
+                href={cancelHref}
+                tone="button"
+                pendingLabel="Torno alla pagina precedente"
+              />
+            }
+          >
             <X className="size-4" />
             Annulla
           </Button>

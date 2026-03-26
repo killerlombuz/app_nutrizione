@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
@@ -16,6 +15,7 @@ import { DeletePatientButton } from "@/components/patients/delete-patient-button
 import { MetricCard } from "@/components/layout/metric-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { TrendLineChart } from "@/components/layout/charts";
+import { PendingLink } from "@/components/navigation/pending-link";
 import {
   Activity,
   ArrowRight,
@@ -80,11 +80,28 @@ export default async function PatientDetailPage({
           .join(" - ")}
         action={
           <>
-            <Button variant="outline" render={<Link href={`/patients/${patientId}/edit`} />}>
+            <Button
+              variant="outline"
+              render={
+                <PendingLink
+                  href={`/patients/${patientId}/edit`}
+                  tone="button"
+                  pendingLabel={`Apro la modifica di ${patient.name}`}
+                />
+              }
+            >
               <ClipboardPenLine className="size-4" />
               Modifica
             </Button>
-            <Button render={<Link href={`/patients/${patientId}/visits/new`} />}>
+            <Button
+              render={
+                <PendingLink
+                  href={`/patients/${patientId}/visits/new`}
+                  tone="button"
+                  pendingLabel={`Apro una nuova visita per ${patient.name}`}
+                />
+              }
+            >
               <CalendarPlus2 className="size-4" />
               Nuova Visita
             </Button>
@@ -272,7 +289,16 @@ export default async function PatientDetailPage({
       <Card className="bg-white/[0.78]">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Storico Visite</CardTitle>
-          <Button size="sm" render={<Link href={`/patients/${patientId}/visits/new`} />}>
+          <Button
+            size="sm"
+            render={
+              <PendingLink
+                href={`/patients/${patientId}/visits/new`}
+                tone="button"
+                pendingLabel={`Apro una nuova visita per ${patient.name}`}
+              />
+            }
+          >
             + Visita
           </Button>
         </CardHeader>
@@ -282,10 +308,12 @@ export default async function PatientDetailPage({
           ) : (
             <div className="space-y-2">
               {patient.visits.map((visit) => (
-                <Link
+                <PendingLink
                   key={visit.id}
                   href={`/patients/${patientId}/visits/${visit.id}/edit`}
-                  className="flex items-center justify-between rounded-[1.4rem] bg-[var(--surface-low)] px-4 py-4 transition-all duration-200 hover:bg-white hover:shadow-[var(--shadow-soft)]"
+                  tone="panel"
+                  pendingLabel={`Apro la visita del ${visit.date.toLocaleDateString("it-IT")}`}
+                  className="flex items-center justify-between rounded-[1.4rem] bg-[var(--surface-low)] px-4 py-4 transition-all duration-[var(--motion-duration-medium)] ease-[var(--motion-ease-standard)] hover:bg-white hover:shadow-[var(--shadow-soft)]"
                 >
                   <span className="font-medium">
                     {visit.date.toLocaleDateString("it-IT")}
@@ -295,7 +323,7 @@ export default async function PatientDetailPage({
                     {visit.bodyFatPct && <span>{visit.bodyFatPct}% FM</span>}
                     {visit.leanMassKg && <span>{visit.leanMassKg} kg MM</span>}
                   </div>
-                </Link>
+                </PendingLink>
               ))}
             </div>
           )}
@@ -305,7 +333,16 @@ export default async function PatientDetailPage({
       <Card className="bg-white/[0.78]">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Piani Dieta</CardTitle>
-          <Button size="sm" render={<Link href={`/patients/${patientId}/meal-plans/new`} />}>
+          <Button
+            size="sm"
+            render={
+              <PendingLink
+                href={`/patients/${patientId}/meal-plans/new`}
+                tone="button"
+                pendingLabel={`Apro un nuovo piano per ${patient.name}`}
+              />
+            }
+          >
             + Piano
           </Button>
         </CardHeader>
@@ -315,17 +352,19 @@ export default async function PatientDetailPage({
           ) : (
             <div className="space-y-2">
               {patient.mealPlans.map((plan) => (
-                <Link
+                <PendingLink
                   key={plan.id}
                   href={`/patients/${patientId}/meal-plans/${plan.id}`}
-                  className="flex items-center justify-between rounded-[1.4rem] bg-[var(--surface-low)] px-4 py-4 transition-all duration-200 hover:bg-white hover:shadow-[var(--shadow-soft)]"
+                  tone="panel"
+                  pendingLabel={`Apro il piano ${plan.name || "senza nome"}`}
+                  className="flex items-center justify-between rounded-[1.4rem] bg-[var(--surface-low)] px-4 py-4 transition-all duration-[var(--motion-duration-medium)] ease-[var(--motion-ease-standard)] hover:bg-white hover:shadow-[var(--shadow-soft)]"
                 >
                   <span className="font-medium">{plan.name || "Piano senza nome"}</span>
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <span>{plan.date.toLocaleDateString("it-IT")}</span>
                     {plan.totalKcalRest && <span>{Math.round(plan.totalKcalRest)} kcal</span>}
                   </div>
-                </Link>
+                </PendingLink>
               ))}
             </div>
           )}

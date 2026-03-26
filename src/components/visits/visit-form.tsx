@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import { Activity, Ruler, Save, Scale, Shapes, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,7 @@ import {
   calculateBmi,
 } from "@/lib/calculations/body-composition";
 import { bmrKatchMcArdle } from "@/lib/calculations/metabolism";
+import { PendingLink } from "@/components/navigation/pending-link";
 
 interface VisitFormProps {
   action: (formData: FormData) => Promise<{ error?: Record<string, string[]> } | void>;
@@ -216,7 +216,16 @@ export function VisitForm({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="outline" render={<Link href={cancelHref} />}>
+          <Button
+            variant="outline"
+            render={
+              <PendingLink
+                href={cancelHref}
+                tone="button"
+                pendingLabel="Torno alla pagina precedente"
+              />
+            }
+          >
             <X className="size-4" />
             Annulla
           </Button>

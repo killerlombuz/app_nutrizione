@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import {
@@ -12,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { MetricCard } from "@/components/layout/metric-card";
 import { SparkBarChart } from "@/components/layout/charts";
+import { PendingLink } from "@/components/navigation/pending-link";
 import {
   Activity,
   Apple,
@@ -122,10 +122,29 @@ export default async function DashboardPage() {
         description="Una vista rapida su pazienti, visite e materiali clinici. Questa prima tranche recepisce la direzione Stitch su gerarchia visiva, superfici e densita' informativa."
         action={
           <>
-            <Button variant="outline" render={<Link href="/patients/new" />}>
+            <Button
+              variant="outline"
+              render={
+                <PendingLink
+                  href="/patients/new"
+                  tone="button"
+                  pendingLabel="Apro la creazione del paziente"
+                />
+              }
+            >
               Nuovo Paziente
             </Button>
-            <Button render={<Link href="/patients" />}>Apri Clinica</Button>
+            <Button
+              render={
+                <PendingLink
+                  href="/patients"
+                  tone="button"
+                  pendingLabel="Apro la clinica"
+                />
+              }
+            >
+              Apri Clinica
+            </Button>
           </>
         }
       />
@@ -146,7 +165,17 @@ export default async function DashboardPage() {
                   Cartelle aggiornate di recente con accesso diretto alle viste cliniche.
                 </CardDescription>
               </div>
-              <Button variant="ghost" size="sm" render={<Link href="/patients" />}>
+              <Button
+                variant="ghost"
+                size="sm"
+                render={
+                  <PendingLink
+                    href="/patients"
+                    tone="button"
+                    pendingLabel="Apro tutti i pazienti"
+                  />
+                }
+              >
                 Vedi tutti
                 <ChevronRight className="size-4" />
               </Button>
@@ -154,41 +183,48 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="pt-4">
             {recentPatients.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Nessun paziente registrato.{" "}
-                <Link href="/patients/new" className="font-medium text-primary underline">
-                  Aggiungi il primo.
-                </Link>
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {recentPatients.map((patient) => (
-                  <Link
+                <p className="text-sm text-muted-foreground">
+                  Nessun paziente registrato.{" "}
+                  <PendingLink
+                    href="/patients/new"
+                    tone="text"
+                    pendingLabel="Apro la creazione del primo paziente"
+                    className="font-medium text-primary underline"
+                  >
+                    Aggiungi il primo.
+                  </PendingLink>
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {recentPatients.map((patient) => (
+                    <PendingLink
                     key={patient.id}
                     href={`/patients/${patient.id}`}
-                    className="grid gap-3 rounded-[1.5rem] bg-[var(--surface-low)] px-4 py-4 transition-all duration-200 hover:bg-white hover:shadow-[var(--shadow-soft)] sm:grid-cols-[minmax(0,1.2fr)_120px_140px]"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">{patient.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {patient.gender === "F"
-                          ? "Donna"
-                          : patient.gender === "M"
-                            ? "Uomo"
-                            : "Profilo"}
-                        {patient.heightCm ? ` - ${patient.heightCm} cm` : ""}
-                      </p>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {patient.visits[0]
-                        ? new Date(patient.visits[0].date).toLocaleDateString("it-IT")
-                        : "Nessuna visita"}
-                    </div>
-                    <div className="flex items-center justify-between gap-3 text-sm sm:justify-end">
-                      <span className="text-muted-foreground">Apri scheda</span>
-                      <ChevronRight className="size-4 text-primary" />
-                    </div>
-                  </Link>
+                      tone="panel"
+                      pendingLabel={`Apro la scheda di ${patient.name}`}
+                      className="grid gap-3 rounded-[1.5rem] bg-[var(--surface-low)] px-4 py-4 transition-all duration-[var(--motion-duration-medium)] ease-[var(--motion-ease-standard)] hover:bg-white hover:shadow-[var(--shadow-soft)] sm:grid-cols-[minmax(0,1.2fr)_120px_140px]"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{patient.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {patient.gender === "F"
+                            ? "Donna"
+                            : patient.gender === "M"
+                              ? "Uomo"
+                              : "Profilo"}
+                          {patient.heightCm ? ` - ${patient.heightCm} cm` : ""}
+                        </p>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {patient.visits[0]
+                          ? new Date(patient.visits[0].date).toLocaleDateString("it-IT")
+                          : "Nessuna visita"}
+                      </div>
+                      <div className="flex items-center justify-between gap-3 text-sm sm:justify-end">
+                        <span className="text-muted-foreground">Apri scheda</span>
+                        <ChevronRight className="size-4 text-primary" />
+                      </div>
+                    </PendingLink>
                 ))}
               </div>
             )}
