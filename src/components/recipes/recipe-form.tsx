@@ -19,7 +19,7 @@ interface SearchResult {
   kcalPer100g: number;
 }
 
-interface RecipeFormProps {
+export interface RecipeFormProps {
   action: (data: {
     name: string;
     portions: number | null;

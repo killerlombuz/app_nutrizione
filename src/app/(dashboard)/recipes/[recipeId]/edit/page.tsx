@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
-import { RecipeForm } from "@/components/recipes/recipe-form";
+import { RecipeFormClient } from "@/components/recipes/recipe-form-client";
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 import { updateRecipe } from "@/features/recipes/actions";
 
@@ -41,7 +41,7 @@ export default async function EditRecipePage({
         <h1 className="text-2xl font-bold">Modifica Ricetta</h1>
         <DeleteRecipeButton recipeId={recipeId} recipeName={recipe.name} />
       </div>
-      <RecipeForm
+      <RecipeFormClient
         action={boundAction}
         defaultValues={defaultValues}
         submitLabel="Aggiorna Ricetta"
