@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
@@ -16,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { MEAL_TYPE_LABELS } from "@/lib/constants";
 import { getFoodEmoji } from "@/lib/food-emoji";
 import { duplicateMealPlan, deleteMealPlan } from "@/features/meal-plans/actions";
+import { PendingLink } from "@/components/navigation/pending-link";
 
 export default async function MealPlanPreviewPage({
   params,
@@ -61,15 +61,35 @@ export default async function MealPlanPreviewPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" render={<Link href={`/patients/${patientId}/meal-plans/${planId}/edit`} />}>
-              Modifica
+          <Button
+            variant="outline"
+            render={
+              <PendingLink
+                href={`/patients/${patientId}/meal-plans/${planId}/edit`}
+                tone="button"
+                pendingLabel={`Apro la modifica di ${plan.name || "questo piano"}`}
+              />
+            }
+          >
+            Modifica
           </Button>
           <form action={duplicateMealPlan.bind(null, patientId, planId)}>
             <Button type="submit" variant="outline">
               Duplica
             </Button>
           </form>
-          <Button variant="outline" render={<Link href={`/patients/${patientId}/report`} />}>PDF</Button>
+          <Button
+            variant="outline"
+            render={
+              <PendingLink
+                href={`/patients/${patientId}/report`}
+                tone="button"
+                pendingLabel={`Apro il report di ${patient.name}`}
+              />
+            }
+          >
+            PDF
+          </Button>
         </div>
       </div>
 

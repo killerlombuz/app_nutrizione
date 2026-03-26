@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BookOpenText,
@@ -16,8 +15,10 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PendingLink } from "@/components/navigation/pending-link";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -71,13 +72,64 @@ function getInitials(name: string) {
     .join("");
 }
 
-function SidebarContent({ professional }: { professional: ProfessionalSummary }) {
+function SidebarNavItem({
+  href,
+  label,
+  icon: Icon,
+  isActive,
+  closeOnNavigate = false,
+}: {
+  href: string;
+  label: string;
+  icon: (typeof navGroups)[number]["items"][number]["icon"];
+  isActive: boolean;
+  closeOnNavigate?: boolean;
+}) {
+  const link = (
+    <PendingLink
+      href={href}
+      tone="sidebar"
+      pendingLabel={`Apro ${label}`}
+      className={cn(
+        "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-[var(--motion-duration-medium)] ease-[var(--motion-ease-standard)]",
+        isActive
+          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+          : "text-sidebar-foreground/70 hover:bg-white/[0.06] hover:text-sidebar-foreground"
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-9 items-center justify-center rounded-xl transition-colors duration-[var(--motion-duration-medium)]",
+          isActive ? "bg-white/10" : "bg-white/5"
+        )}
+      >
+        <Icon className="size-4" />
+      </span>
+      <span className="flex-1">{label}</span>
+      {isActive ? <ChevronRight className="size-4 opacity-70" /> : null}
+    </PendingLink>
+  );
+
+  if (!closeOnNavigate) {
+    return link;
+  }
+
+  return <SheetClose render={link} />;
+}
+
+function SidebarContent({
+  professional,
+  closeOnNavigate = false,
+}: {
+  professional: ProfessionalSummary;
+  closeOnNavigate?: boolean;
+}) {
   const pathname = usePathname();
 
   return (
     <div className="flex h-full flex-col rounded-[2rem] bg-sidebar px-4 py-5 text-sidebar-foreground shadow-[0_26px_55px_rgba(0,0,0,0.28)]">
       <div className="border-b border-sidebar-border px-2 pb-5">
-        <Link href="/" className="flex items-center gap-3">
+        <PendingLink href="/" tone="sidebar" pendingLabel="Apro la dashboard" className="flex items-center gap-3">
           <span className="flex size-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#10b981,#0b7a55)] shadow-[0_10px_25px_rgba(16,185,129,0.24)]">
             <FlaskConical className="size-5 text-white" />
           </span>
@@ -89,7 +141,7 @@ function SidebarContent({ professional }: { professional: ProfessionalSummary })
               Clinical Atelier
             </p>
           </div>
-        </Link>
+        </PendingLink>
       </div>
 
       <nav className="flex-1 space-y-7 overflow-y-auto px-2 py-6">
@@ -102,30 +154,16 @@ function SidebarContent({ professional }: { professional: ProfessionalSummary })
               {group.items.map((item) => {
                 const isActive =
                   item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-                const Icon = item.icon;
 
                 return (
-                  <Link
+                  <SidebarNavItem
                     key={item.href}
                     href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                        : "text-sidebar-foreground/70 hover:bg-white/[0.06] hover:text-sidebar-foreground"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex size-9 items-center justify-center rounded-xl",
-                        isActive ? "bg-white/10" : "bg-white/5"
-                      )}
-                    >
-                      <Icon className="size-4" />
-                    </span>
-                    <span className="flex-1">{item.label}</span>
-                    {isActive ? <ChevronRight className="size-4 opacity-70" /> : null}
-                  </Link>
+                    label={item.label}
+                    icon={item.icon}
+                    isActive={isActive}
+                    closeOnNavigate={closeOnNavigate}
+                  />
                 );
               })}
             </div>
@@ -193,7 +231,7 @@ export function MobileSidebar({ professional }: { professional: ProfessionalSumm
         <SheetHeader className="sr-only">
           <SheetTitle>Navigazione</SheetTitle>
         </SheetHeader>
-        <SidebarContent professional={professional} />
+        <SidebarContent professional={professional} closeOnNavigate />
       </SheetContent>
     </Sheet>
   );

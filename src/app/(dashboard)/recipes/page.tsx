@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
 import { MetricCard } from "@/components/layout/metric-card";
+import { PendingLink } from "@/components/navigation/pending-link";
 import { BookOpenText, CookingPot, Plus } from "lucide-react";
 
 export default async function RecipesPage() {
@@ -43,7 +43,15 @@ export default async function RecipesPage() {
         title="Ricette"
         description="Archivio ricette e combinazioni alimentari riusabili nella pratica clinica."
         action={
-          <Button render={<Link href="/recipes/new" />}>
+          <Button
+            render={
+              <PendingLink
+                href="/recipes/new"
+                tone="button"
+                pendingLabel="Apro la creazione della ricetta"
+              />
+            }
+          >
             <Plus className="size-4" />
             Nuova Ricetta
           </Button>
@@ -91,12 +99,14 @@ export default async function RecipesPage() {
                 {recipes.map((recipe) => (
                   <TableRow key={recipe.id}>
                     <TableCell>
-                      <Link
+                      <PendingLink
                         href={`/recipes/${recipe.id}/edit`}
+                        tone="text"
+                        pendingLabel={`Apro la modifica di ${recipe.name}`}
                         className="font-medium text-primary hover:underline"
                       >
                         {recipe.name}
-                      </Link>
+                      </PendingLink>
                     </TableCell>
                     <TableCell className="text-right">
                       {recipe.totalKcal ? Math.round(recipe.totalKcal) : "-"}

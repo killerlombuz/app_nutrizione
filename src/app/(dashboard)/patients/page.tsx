@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
 import { MetricCard } from "@/components/layout/metric-card";
+import { PendingLink } from "@/components/navigation/pending-link";
 import { Activity, Plus, UserRoundSearch, UsersRound } from "lucide-react";
 
 export default async function PatientsPage({
@@ -50,7 +50,15 @@ export default async function PatientsPage({
         title="Pazienti"
         description="Gestione anagrafica e cartelle cliniche. La vista recepisce il modello Stitch con piu' enfasi su ricerca, densita' dati e accesso rapido alle schede."
         action={
-          <Button render={<Link href="/patients/new" />}>
+          <Button
+            render={
+              <PendingLink
+                href="/patients/new"
+                tone="button"
+                pendingLabel="Apro la creazione del paziente"
+              />
+            }
+          >
             <Plus className="size-4" />
             Nuovo Paziente
           </Button>
@@ -127,15 +135,17 @@ export default async function PatientsPage({
                 {patients.map((patient) => (
                   <TableRow key={patient.id}>
                     <TableCell>
-                      <Link
+                      <PendingLink
                         href={`/patients/${patient.id}`}
+                        tone="text"
+                        pendingLabel={`Apro la scheda di ${patient.name}`}
                         className="font-medium text-primary hover:underline"
                       >
                         <span className="block">{patient.name}</span>
                         <span className="mt-1 block text-xs text-muted-foreground">
                           {patient._count.mealPlans > 0 ? "piano presente" : "profilo base"}
                         </span>
-                      </Link>
+                      </PendingLink>
                     </TableCell>
                     <TableCell>
                       {patient.gender === "F"

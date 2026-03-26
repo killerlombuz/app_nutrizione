@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ import {
 import { FOOD_CATEGORIES } from "@/lib/constants";
 import { PageHeader } from "@/components/layout/page-header";
 import { MetricCard } from "@/components/layout/metric-card";
+import { PendingLink } from "@/components/navigation/pending-link";
 import { Apple, Filter, Plus, Wheat } from "lucide-react";
 
 export default async function FoodsPage({
@@ -54,7 +54,15 @@ export default async function FoodsPage({
         title="Database alimenti"
         description="Catalogo consultabile con filtri di categoria e marcatori nutrizionali. La vista si allinea alla direzione Stitch, con focus su scansione rapida e leggibilita'."
         action={
-          <Button render={<Link href="/foods/new" />}>
+          <Button
+            render={
+              <PendingLink
+                href="/foods/new"
+                tone="button"
+                pendingLabel="Apro la creazione dell'alimento"
+              />
+            }
+          >
             <Plus className="size-4" />
             Nuovo Alimento
           </Button>
@@ -130,12 +138,14 @@ export default async function FoodsPage({
               {foods.map((food) => (
                 <TableRow key={food.id}>
                   <TableCell>
-                    <Link
+                    <PendingLink
                       href={`/foods/${food.id}/edit`}
+                      tone="text"
+                      pendingLabel={`Apro la modifica di ${food.name}`}
                       className="font-medium text-primary hover:underline"
                     >
                       {food.name}
-                    </Link>
+                    </PendingLink>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {food.category?.replace(/_/g, " ") ?? "-"}
