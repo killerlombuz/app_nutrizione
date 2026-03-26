@@ -6,13 +6,14 @@
 
 NutriPlan e' un gestionale SaaS per nutrizionisti.
 
-Copre:
+Domini coperti:
 - pazienti e anagrafica clinica
 - visite con misure antropometriche, plicometria JP3/JP7 e circonferenze
 - database alimenti
-- piani dieta con wizard a 4 step
+- piani dieta con wizard a step
 - report PDF
 - ricette, integratori e istruzioni dietetiche
+- import dati da Excel
 
 ## Stack corrente
 
@@ -23,26 +24,23 @@ Copre:
 | Styling | Tailwind CSS 4 |
 | UI Kit | componenti locali su `@base-ui/react` |
 | Database | PostgreSQL |
-| ORM | Prisma |
+| ORM | Prisma 7 |
 | Auth | Supabase Auth |
 | PDF | Playwright |
 | Import | SheetJS |
 | Validazione | Zod |
 
-## Stato UI aggiornato
+## Comandi principali
 
-Il branch `feat/ui-refresh-stitch` ha introdotto il redesign grafico basato sul progetto Stitch `projects/5524774794365872444` (`Lista Pazienti - NutriPlan`).
-
-Tranche completate:
-- shell applicativa, sidebar, header e token visuali
-- dashboard e pagine core (`patients`, dettaglio paziente, `foods`, `settings`)
-- workflow `Nuova Visita` e `Wizard Piano Dieta`
-
-Riferimenti principali:
-- `src/components/layout/*`
-- `src/components/visits/visit-form.tsx`
-- `src/components/meal-plans/wizard/*`
-- `UI_REFRESH_PLAN.md`
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+npx prisma db push
+npx prisma migrate deploy
+npx prisma db seed
+```
 
 ## Avvio locale
 
@@ -54,7 +52,7 @@ npx prisma db seed
 npm run dev
 ```
 
-### Configurazione `.env`
+## Configurazione `.env`
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
@@ -64,16 +62,17 @@ DIRECT_URL="postgresql://<user>:<password>@<region>.pooler.supabase.com:5432/pos
 ```
 
 Note:
-- `DATABASE_URL` usa il **Transaction pooler** (porta 6543, PgBouncer) — usata dall'app a runtime
-- `DIRECT_URL` usa il **Session pooler** (porta 5432) — usata da Prisma CLI per `db push` / `migrate`
-- **Non** usare l'host diretto (`db.<project>.supabase.co:5432`): la porta è spesso bloccata da firewall/VPN
-- Non aggiungere `sslmode=require` a `DATABASE_URL`: causa errori TLS con `@prisma/adapter-pg`
+- `DATABASE_URL` usa il transaction pooler (porta 6543, PgBouncer) ed e' usata dall'app a runtime
+- `DIRECT_URL` usa il session pooler (porta 5432) ed e' usata da Prisma CLI per `db push` / `migrate`
+- non usare l'host diretto `db.<project>.supabase.co:5432`: la porta e' spesso bloccata da firewall o VPN
+- non aggiungere `sslmode=require` a `DATABASE_URL`: causa errori TLS con `@prisma/adapter-pg`
 
-### Note Prisma 7
+## Note Prisma 7
 
-- Le connection URL vanno in `prisma.config.ts`, **non** in `schema.prisma` (`url`/`directUrl` rimossi dal DSL)
-- `prisma.config.ts` usa `DIRECT_URL` per le operazioni di schema (push/migrate)
-- Usare `npx prisma db push` al posto di `prisma migrate dev` per sincronizzare lo schema
+- Le connection URL vanno in `prisma.config.ts`, non in `schema.prisma`
+- `prisma.config.ts` usa `DIRECT_URL` per le operazioni di schema
+- Per sincronizzare lo schema locale usare `npx prisma db push`, non `prisma migrate dev`
+- Il client generato finisce in `src/generated/prisma`: non modificarlo a mano
 
 ## Vincoli scientifici
 
@@ -87,10 +86,18 @@ Note:
 ## Note architetturali
 
 - Mutazioni via Server Actions in `src/features/*/actions.ts`
-- Route handlers usati solo per API client-side: autocomplete alimenti, metabolismo, report, import
+- Route handlers usati per API client-side: autocomplete alimenti, metabolismo, report, import
 - Multi-tenancy tramite `professionalId`
 - I componenti UI usano `render` prop, non `asChild`
 - Il progetto usa naming di dominio italiano per molti enum (`COLAZIONE`, `PRANZO`, `CENA`, ...)
+- Il rendering PDF vive in `src/lib/pdf/*` ed e' esposto da `src/app/api/report/[patientId]/route.ts`
+- Le utility Supabase sono in `src/lib/supabase/*`
+
+## Documentazione
+
+- `README.md` e `CLAUDE.md` sono la documentazione generale da mantenere aggiornata
+- Evitare file di handoff o migration plan temporanei salvo richiesta esplicita
+- Se una decisione progettuale va conservata, integrarla qui o nel README invece di creare nuovi documenti transitori
 
 ## Struttura chiave
 
@@ -118,4 +125,4 @@ scripts/
 ## Note Next.js
 
 - Prima di modificare codice Next, leggere la documentazione locale in `node_modules/next/dist/docs/`
-- Il repository usa ancora `middleware.ts`; Next 16 segnala la deprecazione verso `proxy`, ma al momento build e runtime sono OK
+- Il repository usa ancora `middleware.ts`; Next 16 segnala la deprecazione verso `proxy`, ma build e runtime sono ancora allineati
