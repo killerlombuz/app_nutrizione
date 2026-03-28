@@ -38,6 +38,14 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function safeImageUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const value = url.trim();
+  if (!value) return null;
+  if (!/^(https?:\/\/|data:image\/|blob:|\/)/i.test(value)) return null;
+  return escapeHtml(value);
+}
+
 function findLocalBrowserExecutable(): string | null {
   for (const candidate of LOCAL_BROWSER_CANDIDATES) {
     if (existsSync(candidate)) {
@@ -93,6 +101,12 @@ export async function generatePdf(
   const html = buildReportHtml(data, sections);
   const professionalName = escapeHtml(data.professional.name);
   const contact = escapeHtml(data.professional.phone || data.professional.email);
+  const logoUrl = safeImageUrl(data.professional.logoUrl);
+  const today = new Intl.DateTimeFormat('it-IT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date());
 
   const browser = await getBrowser();
   const page = await browser.newPage();
@@ -106,10 +120,22 @@ export async function generatePdf(
       displayHeaderFooter: true,
       headerTemplate: '<div></div>',
       footerTemplate: `
-        <div style="width:100%;font-size:7pt;color:#66756D;padding:0 16mm;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #D7DFDA;">
-          <span>NutriPlan PDF</span>
-          <span>${professionalName}</span>
-          <span>Pagina <span class="pageNumber"></span> / <span class="totalPages"></span> | ${contact}</span>
+        <div style="width:100%;padding:0 16mm;font-size:7.2pt;color:#66756D;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #D7DFDA;">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+            ${
+              logoUrl
+                ? `<img src="${logoUrl}" alt="${professionalName}" style="height:30px;width:auto;object-fit:contain;flex-shrink:0;" />`
+                : ''
+            }
+            <div style="display:flex;flex-direction:column;line-height:1.2;min-width:0;">
+              <span style="font-weight:700;color:#15201B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${professionalName}</span>
+              <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${contact}</span>
+            </div>
+          </div>
+          <div style="text-align:right;white-space:nowrap;">
+            <div>${today}</div>
+            <div>Pagina <span class="pageNumber"></span> / <span class="totalPages"></span></div>
+          </div>
         </div>
       `,
     });

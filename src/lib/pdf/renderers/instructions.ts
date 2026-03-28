@@ -1,6 +1,16 @@
 import type { ReportData } from '../types';
 import { escHtml, renderPill, renderSectionHeader } from './shared';
 
+function renderSectionNote(note?: string | null): string {
+  if (!note) return '';
+  return `
+    <div class="callout">
+      <p class="callout-title">Nota sezione</p>
+      <p class="callout-copy">${escHtml(note).replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
+}
+
 export function buildInstructions(data: ReportData): string {
   if (!data.instructions.length) return '';
 
@@ -27,6 +37,7 @@ export function buildInstructions(data: ReportData): string {
         'Istruzioni operative e note comportamentali',
         'Ogni blocco raccoglie indicazioni pratiche da tenere a portata di mano nella gestione quotidiana del piano.'
       )}
+      ${renderSectionNote(data.sectionNotes.instructions)}
       <div class="meal-stack">${cards}</div>
     </section>
   `;

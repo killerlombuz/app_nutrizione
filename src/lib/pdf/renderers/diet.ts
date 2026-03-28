@@ -1,11 +1,14 @@
 import type { ReportData, ReportMeal, ReportMealOption, ReportMealPlan } from '../types';
+import { buildMacroDonutSvg, buildMealDistributionSvg } from './charts';
 import {
   MEAL_TYPE_LABELS,
   escHtml,
   fmtDate,
+  fmtMeasure,
   fmtNum,
   fmtRange,
   renderDataTable,
+  renderMetricCard,
   renderPill,
   renderSectionHeader,
 } from './shared';
@@ -52,6 +55,16 @@ function isMainMeal(mealType: string): boolean {
 
 function sortMealOptions(options: ReportMealOption[]): ReportMealOption[] {
   return [...options].sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+function renderSectionNote(note?: string | null): string {
+  if (!note) return '';
+  return `
+    <div class="callout">
+      <p class="callout-title">Nota sezione</p>
+      <p class="callout-copy">${escHtml(note).replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
 }
 
 function renderScenarioCell(option: ReportMealOption, scenario: ScenarioColumn): string {
@@ -227,29 +240,6 @@ function renderVariantCards(plan: ReportMealPlan): string {
     .join('');
 }
 
-function renderDistribution(plan: ReportMealPlan): string {
-  return ['COLAZIONE', 'SPUNTINO_MATTINA', 'PRANZO', 'SPUNTINO_POMERIGGIO', 'CENA', 'SPUNTINO_SERA']
-    .map((mealType) => ({
-      mealType,
-      label: MEAL_TYPE_LABELS[mealType] || mealType,
-      value: distributionForMeal(plan, mealType),
-    }))
-    .filter((item) => item.value > 0)
-    .map((item) => {
-      const width = Math.max(8, Math.min(100, item.value));
-      return `
-        <article class="distribution-item">
-          <div class="distribution-top">
-            <span>${escHtml(item.label)}</span>
-            <strong>${fmtNum(item.value, 0)}%</strong>
-          </div>
-          <div class="distribution-bar"><div class="distribution-fill" style="width:${width}%"></div></div>
-        </article>
-      `;
-    })
-    .join('');
-}
-
 export function buildDietPlan(data: ReportData): string {
   if (!data.mealPlan) return '';
 
@@ -270,6 +260,15 @@ export function buildDietPlan(data: ReportData): string {
     .filter(Boolean)
     .join('');
 
+  const macroCards = plan.macroTargets
+    ? [
+        renderMetricCard('Kcal target', fmtMeasure(plan.macroTargets.totalKcal, 'kcal', 0)),
+        renderMetricCard('Carboidrati', fmtMeasure(plan.macroTargets.carbG, 'g', 0), fmtMeasure(plan.macroTargets.carbKcal, 'kcal', 0), 'soft'),
+        renderMetricCard('Proteine', fmtMeasure(plan.macroTargets.proteinG, 'g', 0), fmtMeasure(plan.macroTargets.proteinKcal, 'kcal', 0), 'accent'),
+        renderMetricCard('Grassi', fmtMeasure(plan.macroTargets.fatG, 'g', 0), fmtMeasure(plan.macroTargets.fatKcal, 'kcal', 0)),
+      ].join('')
+    : '';
+
   return `
     <section class="report-section">
       ${renderSectionHeader(
@@ -278,6 +277,7 @@ export function buildDietPlan(data: ReportData): string {
         'La sezione guida del documento. Le tavole di pranzo e cena concentrano le equivalenze piu rilevanti per il cliente finale.',
         meta
       )}
+      ${renderSectionNote(data.sectionNotes.diet)}
       <section class="plan-hero">
         <article class="accent-panel hero-block">
           <div>
@@ -297,7 +297,21 @@ export function buildDietPlan(data: ReportData): string {
               `
               : ''
           }
-          <div class="distribution-grid">${renderDistribution(plan)}</div>
+          <div class="metric-grid metric-grid--2">${macroCards}</div>
+          <div class="chart-grid">
+            <article class="chart-card">
+              <p class="card-title">Distribuzione macronutrienti</p>
+              ${
+                plan.macroTargets
+                  ? `<div class="chart-wrap">${buildMacroDonutSvg(plan.macroTargets)}</div>`
+                  : '<p class="muted-copy">Serve un piano con target energetico e peso disponibile per stimare la distribuzione macro.</p>'
+              }
+            </article>
+            <article class="chart-card">
+              <p class="card-title">Distribuzione pasti</p>
+              <div class="chart-wrap">${buildMealDistributionSvg(plan)}</div>
+            </article>
+          </div>
         </article>
         <article class="panel hero-block">
           <div>

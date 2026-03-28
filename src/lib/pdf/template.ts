@@ -4,6 +4,7 @@
  */
 
 import { buildCover } from './renderers/cover';
+import { buildComparison } from './renderers/comparison';
 import { buildDietPlan } from './renderers/diet';
 import { buildInstructions } from './renderers/instructions';
 import { buildMeasurements } from './renderers/measurements';
@@ -18,6 +19,7 @@ export function buildReportHtml(data: ReportData, sections: ReportSection[]): st
 
   if (sections.includes('cover')) parts.push(buildCover(data));
   if (sections.includes('measurements')) parts.push(buildMeasurements(data));
+  if (sections.includes('comparison')) parts.push(buildComparison(data));
   if (sections.includes('diet')) parts.push(buildDietPlan(data));
   if (sections.includes('weekly')) parts.push(buildWeeklyExample(data));
   if (sections.includes('supplements')) parts.push(buildSupplements(data));

@@ -1,6 +1,16 @@
 import type { ReportData } from '../types';
 import { escHtml, fmtMeasure, renderPill, renderSectionHeader } from './shared';
 
+function renderSectionNote(note?: string | null): string {
+  if (!note) return '';
+  return `
+    <div class="callout">
+      <p class="callout-title">Nota sezione</p>
+      <p class="callout-copy">${escHtml(note).replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
+}
+
 export function buildSupplements(data: ReportData): string {
   const hasSport = data.mealPlan && (data.mealPlan.workout1Name || data.mealPlan.workout2Name);
   const hasSupplements = data.supplements.length > 0;
@@ -50,6 +60,7 @@ export function buildSupplements(data: ReportData): string {
         'Routine di supporto e carichi di lavoro',
         'Le attivita e gli integratori vengono presentati in schede separate per una consultazione piu immediata.'
       )}
+      ${renderSectionNote(data.sectionNotes.supplements)}
       <div class="stack-grid">
         ${sportCards.join('')}
         ${supplementCards}

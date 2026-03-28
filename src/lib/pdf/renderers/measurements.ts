@@ -1,5 +1,9 @@
 import type { ReportData } from '../types';
-import { buildDonutSvg, buildTrendSvg } from './charts';
+import {
+  buildBodyFatTrendSvg,
+  buildCompositionDonutSvg,
+  buildWeightTrendSvg,
+} from './charts';
 import {
   fmtDate,
   fmtMeasure,
@@ -11,10 +15,21 @@ import {
   renderSectionHeader,
 } from './shared';
 
+function renderSectionNote(note?: string | null): string {
+  if (!note) return '';
+  return `
+    <div class="callout">
+      <p class="callout-title">Nota sezione</p>
+      <p class="callout-copy">${note.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
+}
+
 export function buildMeasurements(data: ReportData): string {
   if (data.visits.length === 0) return '';
 
   const latest = data.visits[0];
+  const previous = data.visits[1] ?? null;
   const summaryMeta = [
     renderPill(fmtDate(latest.date)),
     latest.formulaUsed ? renderPill(latest.formulaUsed, 'primary') : '',
@@ -63,6 +78,10 @@ export function buildMeasurements(data: ReportData): string {
     fmtNum(visit.bmi),
   ]);
 
+  const weightTrendSvg = buildWeightTrendSvg(data.visits);
+  const bodyFatTrendSvg = buildBodyFatTrendSvg(data.visits);
+  const compositionSvg = buildCompositionDonutSvg(latest, previous);
+
   return `
     <section class="report-section">
       ${renderSectionHeader(
@@ -71,33 +90,33 @@ export function buildMeasurements(data: ReportData): string {
         'Le metriche piu recenti vengono presentate in forma sintetica, con dettaglio delle misure e storico visite.',
         summaryMeta
       )}
+      ${renderSectionNote(data.sectionNotes.measurements)}
       <div class="metric-grid">${summaryCards}</div>
       <div class="chart-grid">
-        ${
-          latest.bodyFatPct != null
-            ? `
-              <article class="chart-card">
-                <p class="card-title">Distribuzione massa grassa / massa magra</p>
-                <div class="chart-wrap">${buildDonutSvg(latest.bodyFatPct)}</div>
-              </article>
-            `
-            : ''
-        }
-        ${
-          data.visits.length >= 2
-            ? `
-              <article class="chart-card">
-                <p class="card-title">Andamento nel tempo</p>
-                <div class="chart-wrap">${buildTrendSvg(data.visits)}</div>
-              </article>
-            `
-            : `
-              <article class="chart-card">
-                <p class="card-title">Storico visite</p>
-                <p class="muted-copy">Serve almeno una seconda visita per mostrare il trend grafico.</p>
-              </article>
-            `
-        }
+        <article class="chart-card">
+          <p class="card-title">Trend peso</p>
+          ${
+            weightTrendSvg
+              ? `<div class="chart-wrap">${weightTrendSvg}</div>`
+              : '<p class="muted-copy">Servono almeno due misurazioni del peso per costruire il trend.</p>'
+          }
+        </article>
+        <article class="chart-card">
+          <p class="card-title">Trend BF%</p>
+          ${
+            bodyFatTrendSvg
+              ? `<div class="chart-wrap">${bodyFatTrendSvg}</div>`
+              : '<p class="muted-copy">Servono almeno due misurazioni di body fat per costruire il trend.</p>'
+          }
+        </article>
+        <article class="chart-card">
+          <p class="card-title">Composizione corporea</p>
+          ${
+            compositionSvg
+              ? `<div class="chart-wrap">${compositionSvg}</div>`
+              : '<p class="muted-copy">Servono valori di massa grassa e massa magra per mostrare il grafico.</p>'
+          }
+        </article>
       </div>
       <div class="detail-grid">
         ${

@@ -1,6 +1,16 @@
 import type { ReportData } from '../types';
 import { DAY_LABELS, MEAL_TYPE_LABELS, escHtml, renderPill, renderSectionHeader } from './shared';
 
+function renderSectionNote(note?: string | null): string {
+  if (!note) return '';
+  return `
+    <div class="callout">
+      <p class="callout-title">Nota sezione</p>
+      <p class="callout-copy">${escHtml(note).replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
+}
+
 export function buildWeeklyExample(data: ReportData): string {
   if (!data.mealPlan) return '';
 
@@ -54,6 +64,7 @@ export function buildWeeklyExample(data: ReportData): string {
         'Ritmo settimanale dei pasti',
         'Vista rapida per orientare il cliente nelle rotazioni del piano.'
       )}
+      ${renderSectionNote(data.sectionNotes.weekly)}
       <div class="weekly-shell">${cards}</div>
     </section>
   `;

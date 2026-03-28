@@ -1,3 +1,4 @@
+import { PDF_COLORS } from '../colors';
 import type { ReportData } from '../types';
 import {
   escHtml,
@@ -9,9 +10,28 @@ import {
   renderPill,
 } from './shared';
 
+function renderSectionNote(note?: string | null): string {
+  if (!note) return '';
+  return `
+    <div class="callout">
+      <p class="callout-title">Nota sezione</p>
+      <p class="callout-copy">${escHtml(note).replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
+}
+
+function safeLogoUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const value = url.trim();
+  if (!value) return null;
+  if (!/^(https?:\/\/|data:image\/|blob:|\/)/i.test(value)) return null;
+  return escHtml(value);
+}
+
 export function buildCover(data: ReportData): string {
   const latestVisit = data.visits[0];
   const planDate = data.mealPlan?.date ?? latestVisit?.date ?? new Date();
+  const logoUrl = safeLogoUrl(data.professional.logoUrl);
   const summaryCards = [
     renderMetricCard('Ultimo peso', fmtMeasure(latestVisit?.weightKg, 'kg')),
     renderMetricCard('BMI', fmtNum(latestVisit?.bmi), undefined, 'soft'),
@@ -37,12 +57,27 @@ export function buildCover(data: ReportData): string {
     <section class="report-section cover-page">
       <div class="cover-hero">
         <div class="hero-block">
+          <div style="display:flex;align-items:center;gap:4mm;flex-wrap:wrap;">
+            ${
+              logoUrl
+                ? `<img src="${logoUrl}" alt="${escHtml(data.professional.name)}" style="width:120px;max-height:60px;object-fit:contain;flex-shrink:0;" />`
+                : ''
+            }
+            <div style="display:flex;flex-direction:column;gap:1mm;">
+              <p class="cover-kicker">Studio professionale</p>
+              <p style="font-size:16pt;font-weight:700;line-height:1.1;color:${PDF_COLORS.dark};">${escHtml(
+                data.professional.name
+              )}</p>
+              ${data.professional.title ? `<p class="hero-copy">${escHtml(data.professional.title)}</p>` : ''}
+            </div>
+          </div>
           <p class="cover-kicker">NutriPlan report</p>
           <h1 class="cover-title">Piano nutrizionale personale</h1>
           <p class="cover-subtitle">
             Documento clinico e operativo costruito a partire dalle misure piu recenti,
             dai target del piano e dalle indicazioni alimentari dedicate al paziente.
           </p>
+          ${renderSectionNote(data.sectionNotes.cover)}
         </div>
         <div class="cover-patient">
           <p class="cover-kicker">Paziente</p>

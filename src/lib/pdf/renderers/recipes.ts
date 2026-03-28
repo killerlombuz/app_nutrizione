@@ -1,6 +1,16 @@
 import type { ReportData } from '../types';
 import { escHtml, fmtMeasure, renderDataTable, renderPill, renderSectionHeader } from './shared';
 
+function renderSectionNote(note?: string | null): string {
+  if (!note) return '';
+  return `
+    <div class="callout">
+      <p class="callout-title">Nota sezione</p>
+      <p class="callout-copy">${escHtml(note).replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
+}
+
 export function buildRecipes(data: ReportData): string {
   if (!data.recipes.length) return '';
 
@@ -41,6 +51,7 @@ export function buildRecipes(data: ReportData): string {
         'Preparazioni di supporto al piano',
         'Le ricette vengono presentate in schede compatte, con focus sulle quantita e sull apporto energetico.'
       )}
+      ${renderSectionNote(data.sectionNotes.recipes)}
       <div class="meal-stack">${cards}</div>
     </section>
   `;

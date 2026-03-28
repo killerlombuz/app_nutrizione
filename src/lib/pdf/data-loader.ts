@@ -2,68 +2,72 @@
  * Carica tutti i dati necessari per il report PDF dal database.
  */
 
+import { calculateMacroTargets } from '@/lib/calculations/macros';
 import { prisma } from '@/lib/db';
 import type { ReportData, ReportSection } from './types';
 
 export async function loadReportData(
   patientId: string,
   professionalId: string,
-  sections?: ReportSection[]
+  sections?: ReportSection[],
+  sectionNotes: Partial<Record<ReportSection, string>> = {}
 ): Promise<ReportData> {
   const needsRecipes = !sections || sections.includes('recipes');
   const needsInstructions = !sections || sections.includes('instructions');
   const needsSupplements = !sections || sections.includes('supplements');
 
   let professional, patient, visits, mealPlan, patientSupplements, instructions, recipes;
+
   try {
-  [professional, patient, visits, mealPlan, patientSupplements, instructions, recipes] =
-    await Promise.all([
-      prisma.professional.findUniqueOrThrow({
-        where: { id: professionalId },
-        select: { name: true, title: true, email: true, phone: true },
-      }),
-      prisma.patient.findFirstOrThrow({
-        where: { id: patientId, professionalId },
-        select: { name: true, birthDate: true, gender: true, heightCm: true },
-      }),
-      prisma.visit.findMany({
-        where: { patientId },
-        orderBy: { date: 'desc' },
-      }),
-      prisma.mealPlan.findFirst({
-        where: { patientId },
-        orderBy: { createdAt: 'desc' },
-        include: {
-          mealTemplates: {
-            orderBy: { sortOrder: 'asc' },
-            include: {
-              options: { orderBy: { sortOrder: 'asc' } },
-              weeklyExamples: { orderBy: { dayOfWeek: 'asc' } },
+    [professional, patient, visits, mealPlan, patientSupplements, instructions, recipes] =
+      await Promise.all([
+        prisma.professional.findUniqueOrThrow({
+          where: { id: professionalId },
+          select: { name: true, title: true, email: true, phone: true, logoUrl: true },
+        }),
+        prisma.patient.findFirstOrThrow({
+          where: { id: patientId, professionalId },
+          select: { name: true, birthDate: true, gender: true, heightCm: true },
+        }),
+        prisma.visit.findMany({
+          where: { patientId },
+          orderBy: { date: 'desc' },
+        }),
+        prisma.mealPlan.findFirst({
+          where: { patientId },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            activityLevel: { select: { name: true } },
+            mealTemplates: {
+              orderBy: { sortOrder: 'asc' },
+              include: {
+                options: { orderBy: { sortOrder: 'asc' } },
+                weeklyExamples: { orderBy: { dayOfWeek: 'asc' } },
+              },
             },
           },
-        },
-      }),
-      needsSupplements
-        ? prisma.patientSupplement.findMany({
-            where: { patientId },
-            include: { supplement: true },
-          })
-        : Promise.resolve([]),
-      needsInstructions
-        ? prisma.dietaryInstruction.findMany({
-            where: { professionalId },
-            orderBy: { sortOrder: 'asc' },
-          })
-        : Promise.resolve([]),
-      needsRecipes
-        ? prisma.recipe.findMany({
-            where: { professionalId },
-            include: {
-              ingredients: { orderBy: { sortOrder: 'asc' } },
-            },
-          })
-        : Promise.resolve([]),
-    ]);
+        }),
+        needsSupplements
+          ? prisma.patientSupplement.findMany({
+              where: { patientId },
+              include: { supplement: true },
+            })
+          : Promise.resolve([]),
+        needsInstructions
+          ? prisma.dietaryInstruction.findMany({
+              where: { professionalId },
+              orderBy: { sortOrder: 'asc' },
+            })
+          : Promise.resolve([]),
+        needsRecipes
+          ? prisma.recipe.findMany({
+              where: { professionalId },
+              include: {
+                ingredients: { orderBy: { sortOrder: 'asc' } },
+              },
+            })
+          : Promise.resolve([]),
+      ]);
   } catch (error) {
     const code = (error as { code?: string }).code;
     if (code === 'P2025') {
@@ -72,12 +76,23 @@ export async function loadReportData(
     throw error;
   }
 
+  const macroWeightVisit = visits.find((visit) => visit.weightKg != null) ?? null;
+  const macroTargets =
+    mealPlan && macroWeightVisit?.weightKg != null && mealPlan.totalKcalRest != null
+      ? calculateMacroTargets(
+          mealPlan.totalKcalRest,
+          macroWeightVisit.weightKg,
+          mealPlan.activityLevel?.name ?? 'Sedentarie'
+        )
+      : null;
+
   return {
     professional,
     patient: {
       ...patient,
       gender: patient.gender as 'M' | 'F' | null,
     },
+    sectionNotes,
     visits: visits.map((v) => ({
       date: v.date,
       weightKg: v.weightKg,
@@ -110,6 +125,7 @@ export async function loadReportData(
           name: mealPlan.name,
           date: mealPlan.date,
           numVariants: mealPlan.numVariants,
+          activityLevel: mealPlan.activityLevel?.name ?? null,
           totalKcalRest: mealPlan.totalKcalRest,
           totalKcalWorkout1: mealPlan.totalKcalWorkout1,
           totalKcalWorkout2: mealPlan.totalKcalWorkout2,
@@ -126,6 +142,7 @@ export async function loadReportData(
           pctSnack2: mealPlan.pctSnack2,
           pctSnack3: mealPlan.pctSnack3,
           notes: mealPlan.notes,
+          macroTargets,
           meals: mealPlan.mealTemplates.map((mt) => ({
             mealType: mt.mealType,
             sortOrder: mt.sortOrder,

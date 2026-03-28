@@ -2,12 +2,23 @@
  * Tipi dati per generazione report PDF.
  */
 
+export type ReportSection =
+  | 'cover'
+  | 'measurements'
+  | 'comparison'
+  | 'diet'
+  | 'weekly'
+  | 'supplements'
+  | 'instructions'
+  | 'recipes';
+
 export interface ReportData {
   professional: {
     name: string;
     title: string | null;
     email: string;
     phone: string | null;
+    logoUrl: string | null;
   };
   patient: {
     name: string;
@@ -15,6 +26,7 @@ export interface ReportData {
     gender: 'M' | 'F' | null;
     heightCm: number | null;
   };
+  sectionNotes: Partial<Record<ReportSection, string>>;
   visits: ReportVisit[];
   mealPlan: ReportMealPlan | null;
   supplements: ReportSupplement[];
@@ -56,6 +68,7 @@ export interface ReportMealPlan {
   name: string | null;
   date: Date;
   numVariants: number;
+  activityLevel: string | null;
   totalKcalRest: number | null;
   totalKcalWorkout1: number | null;
   totalKcalWorkout2: number | null;
@@ -72,7 +85,21 @@ export interface ReportMealPlan {
   pctSnack2: number;
   pctSnack3: number;
   notes: string | null;
+  macroTargets: ReportMacroTargets | null;
   meals: ReportMeal[];
+}
+
+export interface ReportMacroTargets {
+  totalKcal: number;
+  fatG: number;
+  fatKcal: number;
+  satFatMaxG: number;
+  carbG: number;
+  carbKcal: number;
+  sugarMaxG: number;
+  proteinG: number;
+  proteinKcal: number;
+  fiberG: number;
 }
 
 export interface ReportMeal {
@@ -126,18 +153,10 @@ export interface ReportRecipe {
   ingredients: { foodName: string | null; grams: number | null }[];
 }
 
-export type ReportSection =
-  | 'cover'
-  | 'measurements'
-  | 'diet'
-  | 'weekly'
-  | 'supplements'
-  | 'instructions'
-  | 'recipes';
-
 export const ALL_SECTIONS: ReportSection[] = [
   'cover',
   'measurements',
+  'comparison',
   'diet',
   'weekly',
   'supplements',
@@ -148,6 +167,7 @@ export const ALL_SECTIONS: ReportSection[] = [
 export const SECTION_LABELS: Record<ReportSection, string> = {
   cover: 'Copertina',
   measurements: 'Composizione Corporea',
+  comparison: 'Confronto visite',
   diet: 'Piano Alimentare',
   weekly: 'Esempio Settimanale',
   supplements: 'Integrazione e Sport',
