@@ -22,14 +22,14 @@ I file `WP-XX.md` contengono specifiche complete: contesto, file coinvolti, sche
 |----|--------|--------|--------|-----------------|
 | [WP-01](WP-01-dashboard-widgets.md) | Dashboard smart widgets ✅ | CC | Medio | page.tsx (dashboard), metric-card.tsx |
 | [WP-02](WP-02-shareable-plan-link.md) | Link condivisibile piano dieta | CC | Basso | nuovo route + page pubblica |
-| [WP-03](WP-03-command-palette.md) | Command palette globale (Cmd+K) | CX | Basso | command.tsx, header.tsx, layout.tsx |
+| [WP-03](WP-03-command-palette.md) | Command palette globale (Cmd+K) ✅ | CX | Basso | command.tsx, header.tsx, layout.tsx |
 
 ### P1 — Feature strategiche
 
 | WP | Titolo | Agente | Effort | File principali |
 |----|--------|--------|--------|-----------------|
 | [WP-04](WP-04-meal-plan-templates.md) | Template e auto-suggest meal plan | CC | Alto | wizard/, actions.ts, schema.prisma |
-| [WP-05](WP-05-branded-pdf.md) | Report PDF brandizzato + grafici | CX | Medio | lib/pdf/renderers/, report-generator.tsx |
+| [WP-05](WP-05-branded-pdf.md) | Report PDF brandizzato + grafici ✅ | CX | Medio | lib/pdf/renderers/, report-generator.tsx |
 | [WP-06](WP-06-patient-timeline.md) | Timeline paziente unificata | CC | Medio | patients/[patientId]/page.tsx, schema.prisma |
 | [WP-07](WP-07-notifications.md) | Sistema notifiche in-app | CC | Medio | header.tsx, schema.prisma, nuovo componente |
 

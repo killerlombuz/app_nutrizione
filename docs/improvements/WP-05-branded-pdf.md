@@ -129,11 +129,11 @@ In `ReportGenerator` (`src/components/report/report-generator.tsx`):
 
 ## Acceptance Criteria
 
-- [ ] Logo professionista visibile su cover page e header pagine
-- [ ] Grafico trend peso con le ultime 10 visite nel PDF
-- [ ] Grafico composizione corporea migliorato con leggenda e delta
-- [ ] Grafico distribuzione macro nel piano dieta
-- [ ] Sezione "Confronto visite" con tabella delta colorata
-- [ ] Note personalizzate per sezione visibili nel PDF
-- [ ] Il PDF rimane leggibile e ben formattato con/senza le nuove sezioni
-- [ ] Nessuna regressione sulle sezioni PDF esistenti
+- [x] Logo professionista visibile su cover page e header pagine
+- [x] Grafico trend peso con le ultime 10 visite nel PDF
+- [x] Grafico composizione corporea migliorato con leggenda e delta
+- [x] Grafico distribuzione macro nel piano dieta
+- [x] Sezione "Confronto visite" con tabella delta colorata
+- [x] Note personalizzate per sezione visibili nel PDF
+- [x] Il PDF rimane leggibile e ben formattato con/senza le nuove sezioni
+- [x] Nessuna regressione sulle sezioni PDF esistenti

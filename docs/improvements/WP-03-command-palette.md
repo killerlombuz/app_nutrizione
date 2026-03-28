@@ -101,10 +101,10 @@ Tutto in `src/components/ui/command.tsx`:
 
 ## Acceptance Criteria
 
-- [ ] `Cmd+K` / `Ctrl+K` apre la command palette
-- [ ] Navigazione statica filtrata client-side (Dashboard, Pazienti, Ricette, etc.)
-- [ ] Ricerca pazienti, alimenti, ricette via API con debounce
-- [ ] Click/Enter naviga alla risorsa selezionata
-- [ ] Escape chiude la palette
-- [ ] Hint `Cmd+K` visibile nell'header
-- [ ] Non interferisce con shortcut del browser (es. non cattura se un input e' focused)
+- [x] `Cmd+K` / `Ctrl+K` apre la command palette
+- [x] Navigazione statica filtrata client-side (Dashboard, Pazienti, Ricette, etc.)
+- [x] Ricerca pazienti, alimenti, ricette via API con debounce
+- [x] Click/Enter naviga alla risorsa selezionata
+- [x] Escape chiude la palette
+- [x] Hint `Cmd+K` visibile nell'header
+- [x] Non interferisce con shortcut del browser (es. non cattura se un input e' focused)
