@@ -1,9 +1,9 @@
-import { Bell, Search, Settings2 } from "lucide-react";
+import { Bell, Settings2 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { MobileSidebar } from "./sidebar";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PendingLink } from "@/components/navigation/pending-link";
+import { CommandPaletteTrigger } from "@/components/layout/command-palette";
 
 interface HeaderProps {
   professional: {
@@ -35,14 +35,7 @@ export async function Header({ professional }: HeaderProps) {
         <MobileSidebar professional={professional} />
 
         <div className="hidden min-w-0 flex-1 items-center lg:flex">
-          <form action="/patients" className="relative w-full max-w-md">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              name="q"
-              placeholder="Cerca paziente..."
-              className="pl-10"
-            />
-          </form>
+          <CommandPaletteTrigger className="max-w-md" />
         </div>
 
         <div className="min-w-0 flex-1 lg:hidden">
