@@ -7,6 +7,7 @@ interface MetricCardProps {
   hint?: string;
   icon: LucideIcon;
   tone?: "emerald" | "cobalt" | "amber" | "violet" | "ink";
+  trend?: number;
   className?: string;
 }
 
@@ -28,6 +29,7 @@ export function MetricCard({
   hint,
   icon: Icon,
   tone = "emerald",
+  trend,
   className,
 }: MetricCardProps) {
   return (
@@ -43,9 +45,16 @@ export function MetricCard({
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-current/65">
             {label}
           </p>
-          <p className="font-heading text-3xl font-semibold tracking-[-0.04em]">
-            {value}
-          </p>
+          <div className="flex items-baseline gap-2">
+            <p className="font-heading text-3xl font-semibold tracking-[-0.04em]">
+              {value}
+            </p>
+            {trend !== undefined && (
+              <span className="text-[0.72rem] font-semibold text-current/60">
+                {trend > 0 ? `▲ +${trend}%` : trend < 0 ? `▼ ${trend}%` : "—"}
+              </span>
+            )}
+          </div>
         </div>
         <span className="flex size-10 items-center justify-center rounded-2xl bg-white/[0.7] text-current shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
           <Icon className="size-[18px]" />
