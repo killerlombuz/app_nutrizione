@@ -98,9 +98,9 @@ Richiede:
 
 ## Acceptance Criteria
 
-- [ ] Dashboard mostra widget "Pazienti da ricontattare" con link operativi
-- [ ] Dashboard mostra widget "Piani in scadenza" con link operativi
-- [ ] Quick actions bar funzionante con dialog ricerca paziente
-- [ ] Metric card mostrano trend % vs mese precedente
-- [ ] Nessuna regressione sulle funzionalita' esistenti
-- [ ] Performance: la pagina carica in <2s (query parallele)
+- [x] Dashboard mostra widget "Pazienti da ricontattare" con link operativi
+- [x] Dashboard mostra widget "Piani in scadenza" con link operativi
+- [x] Quick actions bar funzionante con dialog ricerca paziente
+- [x] Metric card mostrano trend % vs mese precedente
+- [x] Nessuna regressione sulle funzionalita' esistenti
+- [x] Performance: la pagina carica in <2s (query parallele)

@@ -20,7 +20,7 @@ I file `WP-XX.md` contengono specifiche complete: contesto, file coinvolti, sche
 
 | WP | Titolo | Agente | Effort | File principali |
 |----|--------|--------|--------|-----------------|
-| [WP-01](WP-01-dashboard-widgets.md) | Dashboard smart widgets | CC | Medio | page.tsx (dashboard), metric-card.tsx |
+| [WP-01](WP-01-dashboard-widgets.md) | Dashboard smart widgets ✅ | CC | Medio | page.tsx (dashboard), metric-card.tsx |
 | [WP-02](WP-02-shareable-plan-link.md) | Link condivisibile piano dieta | CC | Basso | nuovo route + page pubblica |
 | [WP-03](WP-03-command-palette.md) | Command palette globale (Cmd+K) | CX | Basso | command.tsx, header.tsx, layout.tsx |
 
