@@ -16,6 +16,7 @@ import { MEAL_TYPE_LABELS } from "@/lib/constants";
 import { getFoodEmoji } from "@/lib/food-emoji";
 import { duplicateMealPlan, deleteMealPlan } from "@/features/meal-plans/actions";
 import { PendingLink } from "@/components/navigation/pending-link";
+import { ShareDialog } from "@/components/meal-plans/share-dialog";
 
 export default async function MealPlanPreviewPage({
   params,
@@ -90,6 +91,11 @@ export default async function MealPlanPreviewPage({
           >
             PDF
           </Button>
+          <ShareDialog
+            patientId={patientId}
+            planId={planId}
+            shareToken={plan.shareToken ?? null}
+          />
         </div>
       </div>
 

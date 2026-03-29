@@ -287,6 +287,42 @@ export async function duplicateMealPlan(patientId: string, planId: string) {
   redirect(`/patients/${patientId}/meal-plans/${newPlan.id}`);
 }
 
+export async function regenerateShareToken(
+  patientId: string,
+  planId: string
+) {
+  const professionalId = await requireProfessionalId();
+
+  await prisma.patient.findFirstOrThrow({
+    where: { id: patientId, professionalId },
+  });
+
+  const { createId } = await import("@paralleldrive/cuid2");
+  const plan = await prisma.mealPlan.update({
+    where: { id: planId },
+    data: { shareToken: createId() },
+    select: { shareToken: true },
+  });
+
+  revalidatePath(`/patients/${patientId}/meal-plans/${planId}`);
+  return plan.shareToken;
+}
+
+export async function revokeShareToken(patientId: string, planId: string) {
+  const professionalId = await requireProfessionalId();
+
+  await prisma.patient.findFirstOrThrow({
+    where: { id: patientId, professionalId },
+  });
+
+  await prisma.mealPlan.update({
+    where: { id: planId },
+    data: { shareToken: null },
+  });
+
+  revalidatePath(`/patients/${patientId}/meal-plans/${planId}`);
+}
+
 export async function deleteMealPlan(patientId: string, planId: string) {
   const professionalId = await requireProfessionalId();
 

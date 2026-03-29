@@ -186,8 +186,9 @@ model MealPlan {
   pctSnack2    Float @default(0.065)
   pctSnack3    Float @default(0.0)
 
-  notes     String?
-  createdAt DateTime @default(now())
+  notes      String?
+  shareToken String?  @unique @default(cuid())
+  createdAt  DateTime @default(now())
 
   mealTemplates MealTemplate[]
 

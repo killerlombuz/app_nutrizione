@@ -31,9 +31,10 @@ export async function updateSession(request: NextRequest) {
 
   const isLoginPage = request.nextUrl.pathname.startsWith("/login");
   const isRegisterPage = request.nextUrl.pathname.startsWith("/register");
+  const isSharedPage = request.nextUrl.pathname.startsWith("/shared");
   const isAuthPage = isLoginPage || isRegisterPage;
 
-  if (!user && !isAuthPage) {
+  if (!user && !isAuthPage && !isSharedPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
