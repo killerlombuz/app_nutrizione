@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -135,27 +135,17 @@ export function PatientGoalsCard({
   const [open, setOpen] = useState(false);
 
   const hasGoals =
-    targetWeightKg !== null ||
-    targetWeightKg !== undefined ||
-    targetBodyFatPct !== null ||
-    targetBodyFatPct !== undefined ||
+    [targetWeightKg, targetBodyFatPct].some((value) => value !== null && value !== undefined) ||
     Boolean(targetNotes?.trim());
 
-  const progress = useMemo(
-    () => ({
-      weight: calculateProgress(
-        firstVisit?.weightKg,
-        latestVisit?.weightKg,
-        targetWeightKg
-      ),
-      bodyFat: calculateProgress(
-        firstVisit?.bodyFatPct,
-        latestVisit?.bodyFatPct,
-        targetBodyFatPct
-      ),
-    }),
-    [firstVisit, latestVisit, targetWeightKg, targetBodyFatPct]
-  );
+  const progress = {
+    weight: calculateProgress(firstVisit?.weightKg, latestVisit?.weightKg, targetWeightKg),
+    bodyFat: calculateProgress(
+      firstVisit?.bodyFatPct,
+      latestVisit?.bodyFatPct,
+      targetBodyFatPct
+    ),
+  };
 
   const dialogTitle = hasGoals ? "Modifica obiettivi" : "Imposta obiettivi";
 
