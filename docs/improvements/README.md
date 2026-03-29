@@ -46,7 +46,7 @@ I file `WP-XX.md` contengono specifiche complete: contesto, file coinvolti, sche
 | WP | Titolo | Agente | Effort | File principali |
 |----|--------|--------|--------|-----------------|
 | [WP-11](WP-11-scheduling.md) | Scheduling e appuntamenti [x] | CC | Alto | nuovo modulo, schema.prisma |
-| [WP-12](WP-12-patient-portal.md) | Portale paziente completo | CC | Molto alto | nuovo modulo app, auth, schema.prisma |
+| [WP-12](WP-12-patient-portal.md) | Portale paziente completo [x] | CC | Molto alto | nuovo modulo app, auth, schema.prisma |
 
 ## Ordine di esecuzione consigliato
 

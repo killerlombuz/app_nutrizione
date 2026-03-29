@@ -4,6 +4,8 @@ import {
   ArrowRight,
   ClipboardList,
   FileText,
+  Globe,
+  MessageSquare,
   Pill,
   Scale,
   Sparkles,
@@ -28,6 +30,7 @@ import { TrendLineChart } from "@/components/layout/charts";
 import { PendingLink } from "@/components/navigation/pending-link";
 import { updatePatientGoals } from "@/features/patients/actions";
 import { PATIENT_NOTE_CATEGORY_LABELS } from "@/features/patients/timeline";
+import { PortalInviteButton } from "@/components/patients/portal-invite-button";
 
 export default async function PatientDetailPage({
   params,
@@ -203,7 +206,7 @@ export default async function PatientDetailPage({
               <div>
                 <CardTitle>Ultima visita</CardTitle>
                 <CardDescription>
-                  Riepilogo dell'ultimo rilevamento registrato.
+                  Riepilogo dell&apos;ultimo rilevamento registrato.
                 </CardDescription>
               </div>
               <Button
@@ -282,7 +285,7 @@ export default async function PatientDetailPage({
               <div>
                 <CardTitle>Ultimo piano</CardTitle>
                 <CardDescription>
-                  Accesso rapido all'ultima versione condivisa o in lavorazione.
+                  Accesso rapido all&apos;ultima versione condivisa o in lavorazione.
                 </CardDescription>
               </div>
               <Button
@@ -613,6 +616,87 @@ export default async function PatientDetailPage({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Portale paziente */}
+      <Card className="bg-white/[0.78]">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Globe className="size-5 text-muted-foreground" />
+            <CardTitle>Portale paziente</CardTitle>
+          </div>
+          <CardDescription>
+            Il paziente può accedere al portale per consultare il piano, tenere un
+            diario alimentare e messaggiare con te.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-start gap-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Stato</p>
+              <Badge
+                variant={patient.portalEnabled ? "default" : "secondary"}
+                className={patient.portalEnabled ? "bg-emerald-600" : ""}
+              >
+                {patient.portalEnabled ? "Attivo" : "Non abilitato"}
+              </Badge>
+            </div>
+            {patient.invitedAt && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Abilitato il</p>
+                <p className="text-sm text-muted-foreground">
+                  {patient.invitedAt.toLocaleDateString("it-IT")}
+                </p>
+              </div>
+            )}
+            {patient.lastPortalLogin && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Ultimo accesso</p>
+                <p className="text-sm text-muted-foreground">
+                  {patient.lastPortalLogin.toLocaleDateString("it-IT")}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <PortalInviteButton
+              patientId={patientId}
+              portalEnabled={patient.portalEnabled}
+              hasEmail={!!patient.email}
+            />
+            {patient.portalEnabled && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                render={
+                  <PendingLink
+                    href={`/messages/${patientId}`}
+                    tone="button"
+                    pendingLabel={`Apro i messaggi di ${patient.name}`}
+                  />
+                }
+              >
+                <MessageSquare className="size-4" />
+                Messaggi
+              </Button>
+            )}
+          </div>
+
+          {patient.portalEnabled && patient.email && (
+            <div className="rounded-xl bg-muted/50 p-3 text-sm">
+              <p className="text-muted-foreground">
+                Il paziente può accedere al portale su{" "}
+                <code className="text-foreground font-mono text-xs bg-muted px-1 py-0.5 rounded">
+                  /portal/login
+                </code>{" "}
+                usando l&apos;email{" "}
+                <span className="font-medium text-foreground">{patient.email}</span>.
+              </p>
             </div>
           )}
         </CardContent>

@@ -29,12 +29,29 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname.startsWith("/login");
-  const isRegisterPage = request.nextUrl.pathname.startsWith("/register");
-  const isSharedPage = request.nextUrl.pathname.startsWith("/shared");
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname.startsWith("/login");
+  const isRegisterPage = pathname.startsWith("/register");
+  const isSharedPage = pathname.startsWith("/shared");
+  const isPortalPage = pathname.startsWith("/portal");
+  const isPortalLoginPage = pathname.startsWith("/portal/login");
+  const isPortalCallback = pathname.startsWith("/portal/auth/callback");
   const isAuthPage = isLoginPage || isRegisterPage;
 
-  if (!user && !isAuthPage && !isSharedPage) {
+  // Route portale: /portal/login e /portal/auth/callback sempre accessibili
+  if (isPortalLoginPage || isPortalCallback) {
+    return supabaseResponse;
+  }
+
+  // Altre route portale: senza sessione → redirect a /portal/login
+  if (isPortalPage && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/portal/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Route dashboard: senza sessione → redirect a /login
+  if (!user && !isAuthPage && !isSharedPage && !isPortalPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

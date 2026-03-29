@@ -10,6 +10,7 @@ import {
   FlaskConical,
   LayoutDashboard,
   Menu,
+  MessageSquare,
   Pill,
   Settings,
   Stethoscope,
@@ -47,6 +48,7 @@ const navGroups = [
     items: [
       { href: "/patients", label: "Cartelle cliniche", icon: Users },
       { href: "/calendar", label: "Agenda", icon: CalendarDays },
+      { href: "/messages", label: "Messaggi", icon: MessageSquare },
     ],
   },
   {

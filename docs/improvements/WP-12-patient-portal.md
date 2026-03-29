@@ -151,11 +151,20 @@ Nella pagina paziente (`patients/[patientId]/page.tsx`):
 
 ## Acceptance Criteria
 
-- [ ] Professionista puo' invitare paziente al portale via email
-- [ ] Paziente effettua login con magic link / password
-- [ ] Dashboard portale mostra piano attivo e progressi
-- [ ] Diario alimentare con entry per pasto e foto opzionale
-- [ ] Messaggistica bidirezionale funzionante
-- [ ] Professionista vede diario nella timeline paziente
-- [ ] Isolamento dati: paziente vede solo i propri dati
-- [ ] Layout portale distinto dal dashboard professionista
+- [x] Professionista puo' invitare paziente al portale via email
+- [x] Paziente effettua login con magic link / password
+- [x] Dashboard portale mostra piano attivo e progressi
+- [x] Diario alimentare con entry per pasto e foto opzionale
+- [x] Messaggistica bidirezionale funzionante
+- [ ] Professionista vede diario nella timeline paziente (non implementato in questa fase)
+- [x] Isolamento dati: paziente vede solo i propri dati
+- [x] Layout portale distinto dal dashboard professionista
+
+## Note implementazione
+
+- Auth: Supabase magic link (OTP via `signInWithOtp`), callback a `/portal/auth/callback`
+- Struttura route: `src/app/portal/(auth)/` per login pubblico, `src/app/portal/(protected)/` per pagine autenticate
+- Middleware aggiornato in `src/lib/supabase/middleware.ts` per gestire `/portal/*`
+- Invito paziente: il professionista abilita il portale dalla pagina paziente (toggle `portalEnabled`); il paziente accede da `/portal/login` con la propria email
+- **NOTA Supabase**: aggiungere `[APP_URL]/portal/auth/callback` nella lista "Redirect URLs" nelle impostazioni Supabase Auth
+- La voce "Messaggi" e' stata aggiunta alla sidebar del professionista
