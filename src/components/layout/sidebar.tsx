@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LogoutButton } from "@/components/layout/logout-button";
 
 interface ProfessionalSummary {
   name: string;
@@ -35,31 +36,31 @@ interface ProfessionalSummary {
 
 const navGroups = [
   {
-    label: "Clinica",
+    label: "Dashboard",
     items: [
-      { href: "/", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/patients", label: "Pazienti", icon: Users },
+      { href: "/", label: "Centro operativo", icon: LayoutDashboard },
     ],
   },
   {
-    label: "Pianificazione",
+    label: "Pazienti",
+    items: [{ href: "/patients", label: "Cartelle cliniche", icon: Users }],
+  },
+  {
+    label: "Libreria clinica",
     items: [
+      { href: "/foods", label: "Alimenti", icon: Database },
       { href: "/recipes", label: "Ricette", icon: BookOpenText },
       { href: "/supplements", label: "Integratori", icon: Pill },
       { href: "/instructions", label: "Istruzioni", icon: Stethoscope },
     ],
   },
   {
-    label: "Database",
-    items: [{ href: "/foods", label: "Alimenti", icon: Database }],
-  },
-  {
     label: "Strumenti",
     items: [{ href: "/import", label: "Import Excel", icon: FileSpreadsheet }],
   },
   {
-    label: "Account",
-    items: [{ href: "/settings", label: "Impostazioni", icon: Settings }],
+    label: "Impostazioni",
+    items: [{ href: "/settings", label: "Profilo e workspace", icon: Settings }],
   },
 ] as const;
 
@@ -125,6 +126,17 @@ function SidebarContent({
   closeOnNavigate?: boolean;
 }) {
   const pathname = usePathname();
+  const settingsLink = (
+    <PendingLink
+      href="/settings"
+      tone="sidebar"
+      pendingLabel="Apro le impostazioni"
+      className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-white/[0.08] hover:text-sidebar-foreground"
+    >
+      <Settings className="size-4" />
+      Impostazioni
+    </PendingLink>
+  );
 
   return (
     <div className="flex h-full flex-col rounded-[2rem] bg-sidebar px-4 py-5 text-sidebar-foreground shadow-[0_26px_55px_rgba(0,0,0,0.28)]">
@@ -190,6 +202,10 @@ function SidebarContent({
           >
             Workspace Clinico
           </Badge>
+          <div className="mt-4 flex items-center gap-2 lg:hidden">
+            {closeOnNavigate ? <SheetClose render={settingsLink} /> : settingsLink}
+            <LogoutButton className="flex-1 border-white/10 bg-white/5 text-sidebar-foreground hover:bg-white/[0.08] hover:text-sidebar-foreground" />
+          </div>
         </div>
       </div>
     </div>
