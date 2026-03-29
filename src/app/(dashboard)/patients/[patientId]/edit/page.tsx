@@ -22,7 +22,15 @@ export default async function EditPatientPage({
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Modifica Paziente</h1>
+      <div className="space-y-1">
+        <h2 className="font-heading text-2xl font-semibold tracking-[-0.04em]">
+          Modifica paziente
+        </h2>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Aggiorna anagrafica, contatti e note permanenti senza uscire dal contesto
+          del paziente.
+        </p>
+      </div>
       <PatientForm
         action={boundAction}
         submitLabel="Aggiorna"

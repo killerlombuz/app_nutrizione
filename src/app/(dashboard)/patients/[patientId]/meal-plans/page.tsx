@@ -25,10 +25,15 @@ export default async function MealPlansPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Piani Dieta</h1>
-          <p className="text-muted-foreground">{patient.name}</p>
+      <div className="flex flex-col gap-4 rounded-[1.9rem] bg-white/[0.72] px-6 py-6 shadow-[var(--shadow-soft)] ring-1 ring-black/5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1">
+          <h2 className="font-heading text-2xl font-semibold tracking-[-0.04em]">
+            Piani dieta
+          </h2>
+          <p className="text-sm leading-6 text-muted-foreground">
+            Archivio piani del paziente con accesso rapido a creazione, duplicazione
+            e condivisione.
+          </p>
         </div>
         <Button
           render={

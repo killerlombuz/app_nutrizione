@@ -58,7 +58,7 @@ export default async function EditVisitPage({
         heightCm: patient.heightCm,
         birthDate: patient.birthDate?.toISOString() ?? null,
       }}
-      cancelHref={`/patients/${patientId}`}
+      cancelHref={`/patients/${patientId}/visits`}
       defaultValues={defaults}
       submitLabel="Aggiorna visita"
       title="Modifica Visita"

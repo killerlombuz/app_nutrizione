@@ -2,9 +2,9 @@
 
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
+import { revalidatePatientWorkspace } from "@/features/patients/revalidate";
 import { visitSchema } from "@/validations/visit";
 import { calculateBodyComposition, calculateAge } from "@/lib/calculations/body-composition";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 
@@ -102,8 +102,8 @@ export async function createVisit(patientId: string, formData: FormData) {
     },
   });
 
-  revalidatePath(`/patients/${patientId}`);
-  redirect(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
+  redirect(`/patients/${patientId}/visits`);
 }
 
 export async function updateVisit(
@@ -194,6 +194,6 @@ export async function updateVisit(
     },
   });
 
-  revalidatePath(`/patients/${patientId}`);
-  redirect(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
+  redirect(`/patients/${patientId}/visits`);
 }

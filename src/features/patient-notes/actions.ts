@@ -2,8 +2,8 @@
 
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
+import { revalidatePatientWorkspace } from "@/features/patients/revalidate";
 import { patientNoteSchema } from "@/validations/patient-note";
-import { revalidatePath } from "next/cache";
 
 export async function createPatientNote(patientId: string, formData: FormData) {
   const professionalId = await requireProfessionalId();
@@ -28,7 +28,7 @@ export async function createPatientNote(patientId: string, formData: FormData) {
     },
   });
 
-  revalidatePath(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
 }
 
 export async function deletePatientNote(noteId: string, patientId: string) {
@@ -41,7 +41,7 @@ export async function deletePatientNote(noteId: string, patientId: string) {
   if (!note) return { error: "Nota non trovata" };
 
   await prisma.patientNote.delete({ where: { id: noteId } });
-  revalidatePath(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
 }
 
 export async function toggleNotePin(noteId: string, patientId: string) {
@@ -58,5 +58,5 @@ export async function toggleNotePin(noteId: string, patientId: string) {
     data: { isPinned: !note.isPinned },
   });
 
-  revalidatePath(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
 }

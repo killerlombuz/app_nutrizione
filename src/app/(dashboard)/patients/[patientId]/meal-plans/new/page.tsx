@@ -49,7 +49,7 @@ export default async function NewMealPlanPage({
         heightCm: patient.heightCm,
         birthDate: patient.birthDate?.toISOString() ?? null,
       }}
-      cancelHref={`/patients/${patientId}`}
+      cancelHref={`/patients/${patientId}/meal-plans`}
       activityLevels={activityLevels}
       sportActivities={sportActivities}
       initialState={initialState}
