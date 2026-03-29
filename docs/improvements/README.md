@@ -21,7 +21,7 @@ I file `WP-XX.md` contengono specifiche complete: contesto, file coinvolti, sche
 | WP | Titolo | Agente | Effort | File principali |
 |----|--------|--------|--------|-----------------|
 | [WP-01](WP-01-dashboard-widgets.md) | Dashboard smart widgets ✅ | CC | Medio | page.tsx (dashboard), metric-card.tsx |
-| [WP-02](WP-02-shareable-plan-link.md) | Link condivisibile piano dieta | CC | Basso | nuovo route + page pubblica |
+| [WP-02](WP-02-shareable-plan-link.md) | Link condivisibile piano dieta ✅ | CC | Basso | nuovo route + page pubblica |
 | [WP-03](WP-03-command-palette.md) | Command palette globale (Cmd+K) ✅ | CX | Basso | command.tsx, header.tsx, layout.tsx |
 
 ### P1 — Feature strategiche
@@ -37,8 +37,8 @@ I file `WP-XX.md` contengono specifiche complete: contesto, file coinvolti, sche
 
 | WP | Titolo | Agente | Effort | File principali |
 |----|--------|--------|--------|-----------------|
-| [WP-08](WP-08-recipes-enhancement.md) | Ricette: foto, istruzioni, tag | CX | Basso | recipe-form.tsx, schema.prisma, recipes/page.tsx |
-| [WP-09](WP-09-patient-goals.md) | Obiettivi paziente con progress | CX | Basso | patients/[patientId]/page.tsx, schema.prisma |
+| [WP-08](WP-08-recipes-enhancement.md) | Ricette: foto, istruzioni, tag ✅ | CX | Basso | recipe-form.tsx, schema.prisma, recipes/page.tsx |
+| [WP-09](WP-09-patient-goals.md) | Obiettivi paziente con progress ✅ | CX | Basso | patients/[patientId]/page.tsx, schema.prisma |
 | [WP-10](WP-10-shopping-list.md) | Lista della spesa automatica | CX | Medio | meal-plans/[planId]/page.tsx, nuovo util |
 
 ### P3 — Feature avanzate (fase 2)
