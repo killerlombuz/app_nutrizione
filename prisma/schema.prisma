@@ -301,6 +301,16 @@ model Recipe {
   kcalPerPortion Float?
   portions       Float?
   notes          String?
+  imageUrl       String?
+  prepTimeMin    Int?
+  cookTimeMin    Int?
+  difficulty     String?
+  instructions   String?
+  isVegetarian   Boolean       @default(false)
+  isVegan        Boolean       @default(false)
+  isGlutenFree   Boolean       @default(false)
+  isLactoseFree  Boolean       @default(false)
+  isLowFodmap    Boolean       @default(false)
 
   ingredients RecipeIngredient[]
 

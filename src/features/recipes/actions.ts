@@ -2,16 +2,34 @@
 
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
-import { recipeSchema } from "@/validations/recipe";
+import { recipeSchema, type RecipeFormValues } from "@/validations/recipe";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createRecipe(data: {
-  name: string;
-  portions: number | null;
-  notes: string;
-  ingredients: { foodId?: string; foodName: string; grams: number | null }[];
-}) {
+function buildRecipeData(data: RecipeFormValues) {
+  const portions = data.portions && data.portions > 0 ? data.portions : 1;
+
+  return {
+    name: data.name,
+    totalKcal: null as number | null,
+    kcalPerPortion: null as number | null,
+    portions: data.portions,
+    notes: data.notes || null,
+    imageUrl: data.imageUrl || null,
+    prepTimeMin: data.prepTimeMin ?? null,
+    cookTimeMin: data.cookTimeMin ?? null,
+    difficulty: data.difficulty || null,
+    instructions: data.instructions || null,
+    isVegetarian: data.isVegetarian,
+    isVegan: data.isVegan,
+    isGlutenFree: data.isGlutenFree,
+    isLactoseFree: data.isLactoseFree,
+    isLowFodmap: data.isLowFodmap,
+    portionsForKcal: portions,
+  };
+}
+
+export async function createRecipe(data: RecipeFormValues) {
   const professionalId = await requireProfessionalId();
 
   const parsed = recipeSchema.safeParse(data);
@@ -20,6 +38,7 @@ export async function createRecipe(data: {
   }
 
   const d = parsed.data;
+  const recipeData = buildRecipeData(d);
 
   // Calculate kcal from ingredients
   let totalKcal = 0;
@@ -43,16 +62,24 @@ export async function createRecipe(data: {
     }
   }
 
-  const portions = d.portions && d.portions > 0 ? d.portions : 1;
-
   await prisma.recipe.create({
     data: {
       professionalId,
-      name: d.name,
+      name: recipeData.name,
       totalKcal: totalKcal > 0 ? totalKcal : null,
-      kcalPerPortion: totalKcal > 0 ? totalKcal / portions : null,
-      portions: d.portions,
-      notes: d.notes || null,
+      kcalPerPortion: totalKcal > 0 ? totalKcal / recipeData.portionsForKcal : null,
+      portions: recipeData.portions,
+      notes: recipeData.notes,
+      imageUrl: recipeData.imageUrl,
+      prepTimeMin: recipeData.prepTimeMin,
+      cookTimeMin: recipeData.cookTimeMin,
+      difficulty: recipeData.difficulty,
+      instructions: recipeData.instructions,
+      isVegetarian: recipeData.isVegetarian,
+      isVegan: recipeData.isVegan,
+      isGlutenFree: recipeData.isGlutenFree,
+      isLactoseFree: recipeData.isLactoseFree,
+      isLowFodmap: recipeData.isLowFodmap,
       ingredients: {
         create: d.ingredients.map((ing, i) => ({
           foodId: ing.foodId && ing.foodId !== "" ? ing.foodId : null,
@@ -70,12 +97,7 @@ export async function createRecipe(data: {
 
 export async function updateRecipe(
   recipeId: string,
-  data: {
-    name: string;
-    portions: number | null;
-    notes: string;
-    ingredients: { foodId?: string; foodName: string; grams: number | null }[];
-  }
+  data: RecipeFormValues
 ) {
   const professionalId = await requireProfessionalId();
 
@@ -85,6 +107,7 @@ export async function updateRecipe(
   }
 
   const d = parsed.data;
+  const recipeData = buildRecipeData(d);
 
   let totalKcal = 0;
   const foodIds = d.ingredients
@@ -107,18 +130,26 @@ export async function updateRecipe(
     }
   }
 
-  const portions = d.portions && d.portions > 0 ? d.portions : 1;
-
   await prisma.$transaction([
     prisma.recipeIngredient.deleteMany({ where: { recipeId } }),
     prisma.recipe.update({
       where: { id: recipeId, professionalId },
       data: {
-        name: d.name,
+        name: recipeData.name,
         totalKcal: totalKcal > 0 ? totalKcal : null,
-        kcalPerPortion: totalKcal > 0 ? totalKcal / portions : null,
-        portions: d.portions,
-        notes: d.notes || null,
+        kcalPerPortion: totalKcal > 0 ? totalKcal / recipeData.portionsForKcal : null,
+        portions: recipeData.portions,
+        notes: recipeData.notes,
+        imageUrl: recipeData.imageUrl,
+        prepTimeMin: recipeData.prepTimeMin,
+        cookTimeMin: recipeData.cookTimeMin,
+        difficulty: recipeData.difficulty,
+        instructions: recipeData.instructions,
+        isVegetarian: recipeData.isVegetarian,
+        isVegan: recipeData.isVegan,
+        isGlutenFree: recipeData.isGlutenFree,
+        isLactoseFree: recipeData.isLactoseFree,
+        isLowFodmap: recipeData.isLowFodmap,
         ingredients: {
           create: d.ingredients.map((ing, i) => ({
             foodId: ing.foodId && ing.foodId !== "" ? ing.foodId : null,
