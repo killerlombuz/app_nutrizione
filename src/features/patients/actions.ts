@@ -1,12 +1,13 @@
 "use server";
 
-import { prisma } from "@/lib/db";
-import { requireProfessionalId } from "@/lib/auth";
-import { patientSchema } from "@/validations/patient";
-import { patientGoalsSchema } from "@/validations/patient-goals";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Gender } from "@/generated/prisma/client";
+import { requireProfessionalId } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { revalidatePatientWorkspace } from "@/features/patients/revalidate";
+import { patientGoalsSchema } from "@/validations/patient-goals";
+import { patientSchema } from "@/validations/patient";
 
 export async function createPatient(formData: FormData) {
   const professionalId = await requireProfessionalId();
@@ -63,7 +64,7 @@ export async function updatePatient(patientId: string, formData: FormData) {
     },
   });
 
-  revalidatePath(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
   revalidatePath("/patients");
   redirect(`/patients/${patientId}`);
 }
@@ -101,7 +102,7 @@ export async function updatePatientGoals(patientId: string, formData: FormData) 
     },
   });
 
-  revalidatePath(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
   revalidatePath("/patients");
   redirect(`/patients/${patientId}`);
 }

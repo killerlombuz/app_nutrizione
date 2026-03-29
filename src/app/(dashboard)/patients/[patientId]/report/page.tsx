@@ -30,11 +30,22 @@ export default async function ReportPage({
     : null;
 
   return (
-    <ReportGenerator
-      patientId={patientId}
-      patientName={patient.name}
-      lastVisitDate={lastVisitDate}
-      lastPlanName={lastPlanName}
-    />
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="font-heading text-2xl font-semibold tracking-[-0.04em]">
+          Report
+        </h2>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Prepara la consegna PDF del paziente scegliendo sezioni e note da
+          includere.
+        </p>
+      </div>
+      <ReportGenerator
+        patientId={patientId}
+        patientName={patient.name}
+        lastVisitDate={lastVisitDate}
+        lastPlanName={lastPlanName}
+      />
+    </div>
   );
 }

@@ -7,15 +7,14 @@ import {
   CalendarClock,
   CheckCheck,
   ClipboardList,
-  UserRoundX,
   Sparkles,
+  UserRoundX,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 
 type Notification = {
   id: string;
@@ -67,7 +66,7 @@ export function NotificationPanel() {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter((notification) => !notification.isRead).length;
 
   async function markRead(ids: string[]) {
     await fetch("/api/notifications", {
@@ -75,8 +74,13 @@ export function NotificationPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids }),
     });
+
     setNotifications((prev) =>
-      prev.map((n) => (ids.includes(n.id) ? { ...n, isRead: true } : n))
+      prev.map((notification) =>
+        ids.includes(notification.id)
+          ? { ...notification, isRead: true }
+          : notification
+      )
     );
   }
 
@@ -86,12 +90,20 @@ export function NotificationPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ all: true }),
     });
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, isRead: true }))
+    );
   }
 
-  async function handleNotificationClick(n: Notification) {
-    if (!n.isRead) await markRead([n.id]);
-    if (n.link) router.push(n.link);
+  async function handleNotificationClick(notification: Notification) {
+    if (!notification.isRead) {
+      await markRead([notification.id]);
+    }
+
+    if (notification.link) {
+      router.push(notification.link);
+    }
   }
 
   return (
@@ -109,7 +121,7 @@ export function NotificationPanel() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-80 p-0"
+        className="w-[min(22rem,calc(100vw-1rem))] max-w-[22rem] p-0"
         sideOffset={8}
       >
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -117,7 +129,7 @@ export function NotificationPanel() {
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               <CheckCheck className="size-3.5" />
               Segna tutte come lette
@@ -128,7 +140,7 @@ export function NotificationPanel() {
         <div className="max-h-[420px] overflow-y-auto">
           {loading && notifications.length === 0 && (
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-              Caricamento…
+              Caricamento...
             </p>
           )}
           {!loading && notifications.length === 0 && (
@@ -136,19 +148,20 @@ export function NotificationPanel() {
               Nessuna notifica
             </p>
           )}
-          {notifications.map((n) => {
-            const Icon = TYPE_ICONS[n.type] ?? Bell;
+          {notifications.map((notification) => {
+            const Icon = TYPE_ICONS[notification.type] ?? Bell;
+
             return (
               <button
-                key={n.id}
-                onClick={() => handleNotificationClick(n)}
+                key={notification.id}
+                onClick={() => handleNotificationClick(notification)}
                 className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/60 ${
-                  !n.isRead ? "bg-primary/5" : ""
+                  !notification.isRead ? "bg-primary/5" : ""
                 }`}
               >
                 <span
                   className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-xl ${
-                    !n.isRead
+                    !notification.isRead
                       ? "bg-primary/15 text-primary"
                       : "bg-muted text-muted-foreground"
                   }`}
@@ -158,19 +171,19 @@ export function NotificationPanel() {
                 <div className="min-w-0 flex-1">
                   <p
                     className={`truncate text-sm ${
-                      !n.isRead ? "font-semibold" : "font-medium"
+                      !notification.isRead ? "font-semibold" : "font-medium"
                     }`}
                   >
-                    {n.title}
+                    {notification.title}
                   </p>
                   <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                    {n.message}
+                    {notification.message}
                   </p>
                   <p className="mt-1 text-[0.68rem] text-muted-foreground/70">
-                    {relativeTime(n.createdAt)}
+                    {relativeTime(notification.createdAt)}
                   </p>
                 </div>
-                {!n.isRead && (
+                {!notification.isRead && (
                   <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
                 )}
               </button>

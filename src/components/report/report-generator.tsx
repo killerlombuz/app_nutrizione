@@ -109,12 +109,9 @@ export function ReportGenerator({
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Report PDF</h1>
-      <p className="text-muted-foreground">{patientName}</p>
-
       <Card>
         <CardHeader>
-          <CardTitle>Genera Report</CardTitle>
+          <CardTitle>Genera report PDF</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2 text-sm">

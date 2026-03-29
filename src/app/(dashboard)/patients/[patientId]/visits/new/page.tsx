@@ -30,7 +30,7 @@ export default async function NewVisitPage({
         heightCm: patient.heightCm,
         birthDate: patient.birthDate?.toISOString() ?? null,
       }}
-      cancelHref={`/patients/${patientId}`}
+      cancelHref={`/patients/${patientId}/visits`}
       description="Raccogli misure, pliche e circonferenze in un'unica schermata con anteprima dei principali indicatori."
     />
   );

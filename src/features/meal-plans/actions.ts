@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
+import { revalidatePatientWorkspace } from "@/features/patients/revalidate";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { MealType } from "@/generated/prisma/client";
@@ -123,7 +124,7 @@ export async function saveMealPlan(patientId: string, data: MealPlanInput) {
     },
   });
 
-  revalidatePath(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
   redirect(`/patients/${patientId}/meal-plans/${plan.id}`);
 }
 
@@ -200,7 +201,7 @@ export async function updateMealPlan(
     },
   });
 
-  revalidatePath(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
   redirect(`/patients/${patientId}/meal-plans/${planId}`);
 }
 
@@ -283,7 +284,7 @@ export async function duplicateMealPlan(patientId: string, planId: string) {
     },
   });
 
-  revalidatePath(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
   redirect(`/patients/${patientId}/meal-plans/${newPlan.id}`);
 }
 
@@ -332,6 +333,6 @@ export async function deleteMealPlan(patientId: string, planId: string) {
 
   await prisma.mealPlan.delete({ where: { id: planId } });
 
-  revalidatePath(`/patients/${patientId}`);
-  redirect(`/patients/${patientId}`);
+  revalidatePatientWorkspace(patientId);
+  redirect(`/patients/${patientId}/meal-plans`);
 }

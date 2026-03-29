@@ -2,6 +2,7 @@ import { Search, Settings2 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { MobileSidebar } from "./sidebar";
 import { NotificationPanel } from "@/components/layout/notification-panel";
+import { GlobalActionsMenu } from "@/components/layout/global-actions-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PendingLink } from "@/components/navigation/pending-link";
@@ -12,6 +13,10 @@ interface HeaderProps {
     title?: string | null;
     email: string;
   };
+  patients: {
+    id: string;
+    name: string;
+  }[];
 }
 
 function getInitials(name: string) {
@@ -23,7 +28,7 @@ function getInitials(name: string) {
     .join("");
 }
 
-export async function Header({ professional }: HeaderProps) {
+export async function Header({ professional, patients }: HeaderProps) {
   const today = new Intl.DateTimeFormat("it-IT", {
     weekday: "long",
     day: "numeric",
@@ -36,7 +41,7 @@ export async function Header({ professional }: HeaderProps) {
         <MobileSidebar professional={professional} />
 
         <form action="/patients" className="hidden min-w-0 flex-1 items-center lg:flex">
-          <div className="relative w-full max-w-md">
+          <div className="relative w-full max-w-xl">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
@@ -64,9 +69,8 @@ export async function Header({ professional }: HeaderProps) {
         </div>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:inline-flex">
-            <NotificationPanel />
-          </div>
+          <GlobalActionsMenu patients={patients} />
+          <NotificationPanel />
           <Button
             variant="ghost"
             size="icon-sm"
@@ -78,11 +82,11 @@ export async function Header({ professional }: HeaderProps) {
                 aria-label="Apri impostazioni"
               />
             }
-            className="hidden sm:inline-flex"
+            className="hidden lg:inline-flex"
           >
             <Settings2 className="size-4" />
           </Button>
-          <div className="hidden items-center gap-3 rounded-[1.4rem] bg-white/[0.7] px-3 py-2 shadow-[var(--shadow-soft)] ring-1 ring-black/5 sm:flex">
+          <div className="hidden items-center gap-3 rounded-[1.4rem] bg-white/[0.7] px-3 py-2 shadow-[var(--shadow-soft)] ring-1 ring-black/5 xl:flex">
             <div className="text-right">
               <p className="text-sm font-semibold">{professional.name}</p>
               <p className="max-w-[16rem] truncate text-xs text-muted-foreground">
@@ -93,7 +97,9 @@ export async function Header({ professional }: HeaderProps) {
               {getInitials(professional.name)}
             </div>
           </div>
-          <LogoutButton />
+          <div className="hidden lg:inline-flex">
+            <LogoutButton size="icon-sm" showLabel={false} />
+          </div>
         </div>
       </div>
     </header>
