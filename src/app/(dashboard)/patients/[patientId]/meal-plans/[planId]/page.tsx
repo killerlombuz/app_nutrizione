@@ -12,6 +12,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { ShoppingList } from "@/components/meal-plans/shopping-list";
 import { MEAL_TYPE_LABELS } from "@/lib/constants";
 import { getFoodEmoji } from "@/lib/food-emoji";
 import { duplicateMealPlan, deleteMealPlan } from "@/features/meal-plans/actions";
@@ -38,7 +47,16 @@ export default async function MealPlanPreviewPage({
       mealTemplates: {
         orderBy: { sortOrder: "asc" },
         include: {
-          options: { orderBy: { sortOrder: "asc" } },
+          options: {
+            orderBy: { sortOrder: "asc" },
+            include: {
+              food: {
+                select: {
+                  category: true,
+                },
+              },
+            },
+          },
           weeklyExamples: { orderBy: { dayOfWeek: "asc" } },
         },
       },
@@ -91,6 +109,28 @@ export default async function MealPlanPreviewPage({
           >
             PDF
           </Button>
+          <Sheet>
+            <SheetTrigger render={<Button variant="outline" />}>
+              Lista della spesa
+            </SheetTrigger>
+            <SheetContent className="w-full sm:max-w-2xl">
+              <SheetHeader>
+                <SheetTitle>Lista della spesa</SheetTitle>
+                <SheetDescription>
+                  Vista aggregata del piano per scenario, utile per paziente e professionista.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="flex-1 overflow-y-auto px-4 pb-4">
+                <ShoppingList
+                  planName={plan.name}
+                  mealTemplates={plan.mealTemplates}
+                  numVariants={plan.numVariants}
+                  workout1Name={plan.workout1Name}
+                  workout2Name={plan.workout2Name}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
           <ShareDialog
             patientId={patientId}
             planId={planId}

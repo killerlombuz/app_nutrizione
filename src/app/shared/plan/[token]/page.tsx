@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { MEAL_TYPE_LABELS } from "@/lib/constants";
 import { getFoodEmoji } from "@/lib/food-emoji";
+import { ShoppingList } from "@/components/meal-plans/shopping-list";
 
 export default async function SharedMealPlanPage({
   params,
@@ -24,7 +25,16 @@ export default async function SharedMealPlanPage({
       mealTemplates: {
         orderBy: { sortOrder: "asc" },
         include: {
-          options: { orderBy: { sortOrder: "asc" } },
+          options: {
+            orderBy: { sortOrder: "asc" },
+            include: {
+              food: {
+                select: {
+                  category: true,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -180,6 +190,16 @@ export default async function SharedMealPlanPage({
             </div>
           </div>
         ))}
+
+        <div className="rounded-xl bg-white border border-gray-200 p-4">
+          <ShoppingList
+            planName={plan.name}
+            mealTemplates={plan.mealTemplates}
+            numVariants={plan.numVariants}
+            workout1Name={plan.workout1Name}
+            workout2Name={plan.workout2Name}
+          />
+        </div>
       </main>
 
       {/* Footer */}

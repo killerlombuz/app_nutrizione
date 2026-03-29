@@ -54,19 +54,19 @@ Creare `src/components/meal-plans/shopping-list.tsx` ("use client"):
 
 **Layout:**
 ```
-Lista della Spesa — Piano "Mediterraneo"
+Lista della Spesa - Piano "Mediterraneo"
 Scenario: [Riposo v]  Giorni: [7]
 
 FRUTTA
-  - Mele           1400g  (200g × 7)
-  - Banana          700g  (100g × 7)
+  - Mele           1400g  (200g x 7)
+  - Banana          700g  (100g x 7)
 
 CEREALI
-  - Pasta integrale 560g  (80g × 7)
-  - Pane di segale  350g  (50g × 7)
+  - Pasta integrale 560g  (80g x 7)
+  - Pane di segale  350g  (50g x 7)
 
 CARNE
-  - Petto di pollo  840g  (120g × 7)
+  - Petto di pollo  840g  (120g x 7)
   ...
 
 [Copia lista]  [Stampa]
@@ -76,8 +76,8 @@ CARNE
 - Dropdown per scegliere scenario (riposo, allenamento 1, allenamento 2)
 - Input per numero di giorni (default 7)
 - Ricalcolo automatico al cambio scenario/giorni
-- Bottone "Copia lista" — copia testo plain in clipboard
-- Bottone "Stampa" — window.print() con stile dedicato
+- Bottone "Copia lista" - copia testo plain in clipboard
+- Bottone "Stampa" - window.print() con stile dedicato
 
 ### 3. Integrazione nella pagina piano
 
@@ -115,15 +115,15 @@ Da `src/features/meal-plans/actions.ts` e schema Prisma:
 - `Food` con `category` (FoodCategory enum)
 
 Da `src/lib/constants.ts`:
-- `MEAL_TYPE_LABELS` — label italiane per tipo pasto
+- `MEAL_TYPE_LABELS` - label italiane per tipo pasto
 
 ## Acceptance Criteria
 
-- [ ] Bottone "Lista della spesa" nella pagina piano
-- [ ] Lista aggregata per categoria alimentare
-- [ ] Selezione scenario (riposo/allenamento)
-- [ ] Input giorni con ricalcolo automatico
-- [ ] Grammi totali = grammi per pasto × giorni
-- [ ] "Copia lista" copia testo plain in clipboard
-- [ ] "Stampa" apre dialogo di stampa del browser
-- [ ] Alimenti duplicati in pasti diversi sono aggregati correttamente
+- [x] Bottone "Lista della spesa" nella pagina piano
+- [x] Lista aggregata per categoria alimentare
+- [x] Selezione scenario (riposo/allenamento)
+- [x] Input giorni con ricalcolo automatico
+- [x] Grammi totali = grammi per pasto x giorni
+- [x] "Copia lista" copia testo plain in clipboard
+- [x] "Stampa" apre dialogo di stampa del browser
+- [x] Alimenti duplicati in pasti diversi sono aggregati correttamente
