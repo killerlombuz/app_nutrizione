@@ -1,10 +1,10 @@
-import { Settings2 } from "lucide-react";
+import { Search, Settings2 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { MobileSidebar } from "./sidebar";
 import { NotificationPanel } from "@/components/layout/notification-panel";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PendingLink } from "@/components/navigation/pending-link";
-import { CommandPaletteTrigger } from "@/components/layout/command-palette";
 
 interface HeaderProps {
   professional: {
@@ -35,9 +35,24 @@ export async function Header({ professional }: HeaderProps) {
       <div className="mx-auto flex h-20 w-full max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <MobileSidebar professional={professional} />
 
-        <div className="hidden min-w-0 flex-1 items-center lg:flex">
-          <CommandPaletteTrigger className="max-w-md" />
-        </div>
+        <form action="/patients" className="hidden min-w-0 flex-1 items-center lg:flex">
+          <div className="relative w-full max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              name="q"
+              placeholder="Cerca paziente..."
+              className="h-11 rounded-2xl border-border/60 bg-white/[0.72] pl-10 pr-24 shadow-[var(--shadow-soft)]"
+            />
+            <Button
+              type="submit"
+              variant="ghost"
+              className="absolute right-1 top-1/2 h-9 -translate-y-1/2 rounded-xl px-3 text-sm"
+            >
+              Cerca
+            </Button>
+          </div>
+        </form>
 
         <div className="min-w-0 flex-1 lg:hidden">
           <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
