@@ -26,6 +26,7 @@ model Professional {
   instructions      DietaryInstruction[]
   supplements       Supplement[]
   mealPlanTemplates MealPlanTemplate[]
+  notifications     Notification[]
 
   @@map("professionals")
 }
@@ -433,6 +434,24 @@ model MealPlanTemplateFood {
   templateMeal MealPlanTemplateMeal @relation(fields: [templateMealId], references: [id], onDelete: Cascade)
 
   @@map("meal_plan_template_foods")
+}
+
+// --- Notifiche ---
+
+model Notification {
+  id             String   @id @default(cuid())
+  professionalId String
+  type           String   // "follow_up", "plan_expired", "no_visit", "welcome"
+  title          String
+  message        String
+  link           String?
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([professionalId, isRead, createdAt])
+  @@map("notifications")
 }
 
 // --- Note cliniche ---

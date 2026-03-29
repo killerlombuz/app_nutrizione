@@ -103,10 +103,10 @@ In `src/components/layout/header.tsx`:
 
 ## Acceptance Criteria
 
-- [ ] Campanella nell'header mostra badge con contatore non-lette
-- [ ] Click apre dropdown con lista notifiche
-- [ ] Notifiche generate per: follow-up 30gg, piani scaduti, pazienti senza visita
-- [ ] Click su notifica naviga al link e segna come letta
-- [ ] "Segna tutte come lette" funzionante
-- [ ] Nessun duplicato al refresh della pagina
-- [ ] Notifica "Benvenuto" per nuovi professionisti
+- [x] Campanella nell'header mostra badge con contatore non-lette
+- [x] Click apre dropdown con lista notifiche
+- [x] Notifiche generate per: follow-up 30gg, piani scaduti, pazienti senza visita
+- [x] Click su notifica naviga al link e segna come letta
+- [x] "Segna tutte come lette" funzionante
+- [x] Nessun duplicato al refresh della pagina (dedup 24h per tipo+link)
+- [x] Notifica "Benvenuto" per nuovi professionisti

@@ -1,6 +1,7 @@
-import { Bell, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { MobileSidebar } from "./sidebar";
+import { NotificationPanel } from "@/components/layout/notification-panel";
 import { Button } from "@/components/ui/button";
 import { PendingLink } from "@/components/navigation/pending-link";
 import { CommandPaletteTrigger } from "@/components/layout/command-palette";
@@ -48,9 +49,9 @@ export async function Header({ professional }: HeaderProps) {
         </div>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          <Button variant="ghost" size="icon-sm" className="hidden sm:inline-flex">
-            <Bell className="size-4" />
-          </Button>
+          <div className="hidden sm:inline-flex">
+            <NotificationPanel />
+          </div>
           <Button
             variant="ghost"
             size="icon-sm"
