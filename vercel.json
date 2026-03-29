@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run build:deploy",
   "functions": {
     "src/app/api/report/[patientId]/route.ts": {
       "memory": 1024,
