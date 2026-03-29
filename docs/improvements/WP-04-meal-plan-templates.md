@@ -133,10 +133,10 @@ Nella pagina di visualizzazione del piano (`meal-plans/[planId]/page.tsx`), aggi
 
 ## Acceptance Criteria
 
-- [ ] Wizard mostra step 0 con scelta template o "parti da zero"
-- [ ] Template pre-compila distribuzione % e categorie alimenti
-- [ ] Auto-suggest mostra alimenti filtrati per categoria e allergie paziente
-- [ ] Auto-suggest calcola grammi per raggiungere target kcal
-- [ ] "Salva come template" funziona dalla vista piano
-- [ ] Template di sistema presenti nel seed
-- [ ] Il professionista puo' modificare tutto dopo la pre-compilazione
+- [x] Wizard mostra step 0 con scelta template o "parti da zero"
+- [x] Template pre-compila distribuzione % e categorie alimenti
+- [x] Auto-suggest mostra alimenti filtrati per categoria e allergie paziente
+- [x] Auto-suggest calcola grammi per raggiungere target kcal
+- [x] "Salva come template" funziona dalla vista piano
+- [x] Template di sistema presenti nel seed
+- [x] Il professionista puo' modificare tutto dopo la pre-compilazione

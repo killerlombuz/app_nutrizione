@@ -20,11 +20,12 @@ model Professional {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  patients     Patient[]
-  foods        Food[]
-  recipes      Recipe[]
-  instructions DietaryInstruction[]
-  supplements  Supplement[]
+  patients          Patient[]
+  foods             Food[]
+  recipes           Recipe[]
+  instructions      DietaryInstruction[]
+  supplements       Supplement[]
+  mealPlanTemplates MealPlanTemplate[]
 
   @@map("professionals")
 }
@@ -385,6 +386,53 @@ model PatientCondition {
   notes         String?
 
   @@map("patient_conditions")
+}
+
+// --- Template Piani Dieta ---
+
+model MealPlanTemplate {
+  id             String   @id @default(cuid())
+  professionalId String?
+  name           String
+  description    String?
+  dietType       String?
+  pctBreakfast   Float    @default(0.17)
+  pctLunch       Float    @default(0.45)
+  pctDinner      Float    @default(0.25)
+  pctSnack1      Float    @default(0.065)
+  pctSnack2      Float    @default(0.065)
+  pctSnack3      Float    @default(0.0)
+  createdAt      DateTime @default(now())
+
+  professional Professional?          @relation(fields: [professionalId], references: [id])
+  meals        MealPlanTemplateMeal[]
+
+  @@index([professionalId])
+  @@map("meal_plan_templates")
+}
+
+model MealPlanTemplateMeal {
+  id         String   @id @default(cuid())
+  templateId String
+  mealType   MealType
+  foods      MealPlanTemplateFood[]
+
+  template MealPlanTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@map("meal_plan_template_meals")
+}
+
+model MealPlanTemplateFood {
+  id             String       @id @default(cuid())
+  templateMealId String
+  foodCategory   FoodCategory
+  portionType    String
+  isFixed        Boolean      @default(false)
+  sortOrder      Int          @default(0)
+
+  templateMeal MealPlanTemplateMeal @relation(fields: [templateMealId], references: [id], onDelete: Cascade)
+
+  @@map("meal_plan_template_foods")
 }
 
 // --- Note cliniche ---

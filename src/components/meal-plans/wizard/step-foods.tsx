@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Plus, Search, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,8 @@ import type { WizardFood, WizardState } from "./wizard-container";
 interface StepFoodsProps {
   state: WizardState;
   updateState: (partial: Partial<WizardState>) => void;
+  patientId: string;
+  templateMealMap: Record<string, Array<{ category: string; portionType: string }>>;
 }
 
 interface SearchResult {
@@ -29,7 +31,40 @@ interface SearchResult {
   category: string | null;
 }
 
+interface SuggestedFood {
+  id: string;
+  name: string;
+  kcalPer100g: number;
+  category: string | null;
+  grams: number;
+}
+
 type MealType = (typeof MEAL_TYPE_ORDER)[number];
+
+// Categorie default per pasto (usate in assenza di template)
+const DEFAULT_MEAL_CATEGORIES: Record<string, Array<{ category: string; portionType: string }>> = {
+  COLAZIONE: [
+    { category: "CEREALI", portionType: "carbs_source" },
+    { category: "LATTICINI_E_SOSTITUTI", portionType: "protein_source" },
+  ],
+  PRANZO: [
+    { category: "CEREALI", portionType: "carbs_source" },
+    { category: "CARNE", portionType: "protein_source" },
+  ],
+  CENA: [
+    { category: "CEREALI", portionType: "carbs_source" },
+    { category: "PESCE", portionType: "protein_source" },
+  ],
+  SPUNTINO_MATTINA: [{ category: "FRUTTA", portionType: "main" }],
+  SPUNTINO_POMERIGGIO: [{ category: "FRUTTA", portionType: "main" }],
+  SPUNTINO_SERA: [{ category: "FRUTTA_SECCA", portionType: "fat_source" }],
+};
+
+function portionTypeToRole(portionType: string): string {
+  if (portionType === "carbs_source") return "carb";
+  if (portionType === "protein_source") return "protein";
+  return "main";
+}
 
 function getMealKcal(state: WizardState, mealType: string) {
   const pctMap: Record<string, number> = {
@@ -113,10 +148,12 @@ function getFoodInitials(name: string) {
     .toUpperCase();
 }
 
-export function StepFoods({ state, updateState }: StepFoodsProps) {
+export function StepFoods({ state, updateState, patientId, templateMealMap }: StepFoodsProps) {
   const [activeMealType, setActiveMealType] = useState<MealType>("PRANZO");
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
   const [searchResults, setSearchResults] = useState<Record<string, SearchResult[]>>({});
+  // key: `${mealType}-${category}` => SuggestedFood[]
+  const [suggestions, setSuggestions] = useState<Record<string, SuggestedFood[]>>({});
 
   const activeMeals = useMemo(
     () =>
@@ -151,6 +188,11 @@ export function StepFoods({ state, updateState }: StepFoodsProps) {
   const activeFoods = useMemo(() => activeMeal?.foods ?? [], [activeMeal]);
   const isMainMeal = resolvedMealType ? ["PRANZO", "CENA"].includes(resolvedMealType) : false;
 
+  // Categorie da suggerire per il pasto attivo
+  const activeCategories = resolvedMealType
+    ? (templateMealMap[resolvedMealType] ?? DEFAULT_MEAL_CATEGORIES[resolvedMealType] ?? [])
+    : [];
+
   const totalRestGrams = useMemo(
     () => activeFoods.reduce((sum, food) => sum + food.gramsRest, 0),
     [activeFoods]
@@ -163,6 +205,31 @@ export function StepFoods({ state, updateState }: StepFoodsProps) {
     () => activeFoods.reduce((sum, food) => sum + (food.gramsWorkout2 ?? 0), 0),
     [activeFoods]
   );
+
+  // Carica suggerimenti quando cambia il pasto attivo o le kcal
+  useEffect(() => {
+    if (!resolvedMealType || !activeMealKcal || activeMealKcal.rest <= 0) return;
+
+    const categories = templateMealMap[resolvedMealType] ?? DEFAULT_MEAL_CATEGORIES[resolvedMealType] ?? [];
+    if (!categories.length) return;
+
+    for (const { category } of categories) {
+      const key = `${resolvedMealType}-${category}`;
+      const params = new URLSearchParams({
+        category,
+        targetKcal: String(activeMealKcal.rest),
+        patientId,
+      });
+
+      fetch(`/api/foods/suggest?${params.toString()}`)
+        .then((r) => r.json())
+        .then((data: SuggestedFood[]) => {
+          setSuggestions((prev) => ({ ...prev, [key]: data }));
+        })
+        .catch(() => {/* ignora errori di rete */});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedMealType, activeMealKcal?.rest]);
 
   const searchFoods = useCallback(async (mealType: string, query: string) => {
     setSearchQueries((prev) => ({ ...prev, [mealType]: query }));
@@ -218,6 +285,10 @@ export function StepFoods({ state, updateState }: StepFoodsProps) {
 
     setSearchQueries((prev) => ({ ...prev, [mealType]: "" }));
     setSearchResults((prev) => ({ ...prev, [mealType]: [] }));
+  }
+
+  function addSuggestedFood(mealType: string, food: SuggestedFood, portionType: string) {
+    addFood(mealType, { id: food.id, name: food.name, kcalPer100g: food.kcalPer100g, category: food.category }, portionTypeToRole(portionType));
   }
 
   function removeFood(mealType: string, foodIdx: number) {
@@ -294,6 +365,46 @@ export function StepFoods({ state, updateState }: StepFoodsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
+          {/* Sezione Suggeriti */}
+          {activeCategories.length > 0 && activeMealKcal && activeMealKcal.rest > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-4 text-primary" />
+                <p className="font-medium">Suggeriti</p>
+              </div>
+              <div className="space-y-2">
+                {activeCategories.map(({ category, portionType }) => {
+                  const key = `${resolvedMealType}-${category}`;
+                  const items = suggestions[key] ?? [];
+                  if (!items.length) return null;
+
+                  return (
+                    <div key={key} className="space-y-2">
+                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        {category.replace(/_/g, " ")}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {items.map((food) => (
+                          <button
+                            key={food.id}
+                            type="button"
+                            onClick={() => resolvedMealType && addSuggestedFood(resolvedMealType, food, portionType)}
+                            className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+                          >
+                            <Plus className="size-3" />
+                            {food.name}
+                            <span className="text-primary/60 text-xs">({food.grams}g)</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="h-px bg-border/50" />
+            </div>
+          )}
+
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">Alimenti selezionati</p>

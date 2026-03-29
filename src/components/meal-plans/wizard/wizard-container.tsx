@@ -9,8 +9,10 @@ import { StepDistribution } from "./step-distribution";
 import { StepFoods } from "./step-foods";
 import { StepInfo } from "./step-info";
 import { StepSummary } from "./step-summary";
+import { StepTemplate } from "./step-template";
 import { saveMealPlan, updateMealPlan } from "@/features/meal-plans/actions";
 import { PendingLink } from "@/components/navigation/pending-link";
+import type { MealPlanTemplateData, TemplateMeal } from "@/features/meal-plan-templates/actions";
 
 export interface WizardFood {
   foodId: string;
@@ -72,9 +74,11 @@ interface WizardContainerProps {
   sportActivities: { id: string; name: string; kcalPerHourPerKg: number; defaultDurationMin: number }[];
   initialState?: Partial<WizardState>;
   isInherited?: boolean;
+  templates: MealPlanTemplateData[];
 }
 
 const STEP_META = [
+  { title: "Template", summary: "Scegli un template di partenza oppure configura il piano da zero." },
   { title: "Info & kcal", summary: "Imposta nome piano, data, varianti e scenari calorici." },
   { title: "Distribuzione", summary: "Ripartisci le calorie sui pasti e verifica il totale." },
   { title: "Alimenti", summary: "Assegna alimenti e porzioni ai pasti attivi del piano." },
@@ -124,6 +128,7 @@ export function WizardContainer({
   sportActivities,
   initialState,
   isInherited,
+  templates,
 }: WizardContainerProps) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<WizardState>({
@@ -131,10 +136,30 @@ export function WizardContainer({
     ...initialState,
   });
   const [saving, setSaving] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [templateMeals, setTemplateMeals] = useState<TemplateMeal[]>([]);
 
   const updateState = useCallback((partial: Partial<WizardState>) => {
     setState((prev) => ({ ...prev, ...partial }));
   }, []);
+
+  function handleTemplateSelect(template: MealPlanTemplateData | null) {
+    setSelectedTemplateId(template?.id ?? null);
+    if (template) {
+      setTemplateMeals(template.meals);
+      updateState({
+        pctBreakfast: Math.round(template.pctBreakfast * 1000) / 10,
+        pctLunch: Math.round(template.pctLunch * 1000) / 10,
+        pctDinner: Math.round(template.pctDinner * 1000) / 10,
+        pctSnack1: Math.round(template.pctSnack1 * 1000) / 10,
+        pctSnack2: Math.round(template.pctSnack2 * 1000) / 10,
+        pctSnack3: Math.round(template.pctSnack3 * 1000) / 10,
+      });
+    } else {
+      setTemplateMeals([]);
+    }
+    setStep(1);
+  }
 
   const patientAge = useMemo(() => calculateAge(patient.birthDate), [patient.birthDate]);
   const activeMealCount = useMemo(
@@ -180,6 +205,18 @@ export function WizardContainer({
       state.pctSnack2,
       state.pctSnack3,
     ]
+  );
+
+  // Mappa mealType -> categorie dal template selezionato (per auto-suggest)
+  const templateMealMap = useMemo<Record<string, Array<{ category: string; portionType: string }>>>(
+    () =>
+      Object.fromEntries(
+        templateMeals.map((m) => [
+          m.mealType,
+          m.foods.map((f) => ({ category: f.foodCategory, portionType: f.portionType })),
+        ])
+      ),
+    [templateMeals]
   );
 
   async function handleSave() {
@@ -278,7 +315,7 @@ export function WizardContainer({
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="rounded-[1.9rem] bg-white/[0.75] p-4 shadow-[var(--shadow-soft)] ring-1 ring-black/5">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
             {STEP_META.map((item, index) => {
               const isActive = index === step;
               const isCompleted = index < step;
@@ -395,6 +432,13 @@ export function WizardContainer({
       </Card>
 
       {step === 0 && (
+        <StepTemplate
+          templates={templates}
+          selectedId={selectedTemplateId}
+          onSelect={handleTemplateSelect}
+        />
+      )}
+      {step === 1 && (
         <StepInfo
           state={state}
           updateState={updateState}
@@ -403,9 +447,16 @@ export function WizardContainer({
           sportActivities={sportActivities}
         />
       )}
-      {step === 1 && <StepDistribution state={state} updateState={updateState} />}
-      {step === 2 && <StepFoods state={state} updateState={updateState} />}
-      {step === 3 && <StepSummary state={state} />}
+      {step === 2 && <StepDistribution state={state} updateState={updateState} />}
+      {step === 3 && (
+        <StepFoods
+          state={state}
+          updateState={updateState}
+          patientId={patientId}
+          templateMealMap={templateMealMap}
+        />
+      )}
+      {step === 4 && <StepSummary state={state} />}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button

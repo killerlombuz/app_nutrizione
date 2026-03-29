@@ -26,6 +26,7 @@ import { getFoodEmoji } from "@/lib/food-emoji";
 import { duplicateMealPlan, deleteMealPlan } from "@/features/meal-plans/actions";
 import { PendingLink } from "@/components/navigation/pending-link";
 import { ShareDialog } from "@/components/meal-plans/share-dialog";
+import { SaveAsTemplateDialog } from "@/components/meal-plans/save-as-template-dialog";
 
 export default async function MealPlanPreviewPage({
   params,
@@ -131,6 +132,11 @@ export default async function MealPlanPreviewPage({
               </div>
             </SheetContent>
           </Sheet>
+          <SaveAsTemplateDialog
+            patientId={patientId}
+            planId={planId}
+            planName={plan.name}
+          />
           <ShareDialog
             patientId={patientId}
             planId={planId}

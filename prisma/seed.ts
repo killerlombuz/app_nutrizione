@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
+import type { MealType, FoodCategory } from "../src/generated/prisma/enums";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
@@ -90,6 +91,150 @@ async function main() {
     });
   }
   console.log(`Seeded ${sportActivities.length} sport activities`);
+
+  // Meal Plan Templates di sistema
+  const systemTemplates = [
+    {
+      name: "Mediterranea",
+      description: "Distribuzione classica mediterranea con cereali, pesce e verdure abbondanti.",
+      dietType: "mediterranea",
+      pctBreakfast: 0.17, pctLunch: 0.45, pctDinner: 0.25,
+      pctSnack1: 0.065, pctSnack2: 0.065, pctSnack3: 0.0,
+      meals: [
+        { mealType: "COLAZIONE", foods: [
+          { foodCategory: "CEREALI", portionType: "carbs_source", sortOrder: 0 },
+          { foodCategory: "LATTICINI_E_SOSTITUTI", portionType: "protein_source", sortOrder: 1 },
+        ]},
+        { mealType: "SPUNTINO_MATTINA", foods: [
+          { foodCategory: "FRUTTA", portionType: "main", sortOrder: 0 },
+        ]},
+        { mealType: "PRANZO", foods: [
+          { foodCategory: "CEREALI", portionType: "carbs_source", sortOrder: 0 },
+          { foodCategory: "PESCE", portionType: "protein_source", sortOrder: 1 },
+        ]},
+        { mealType: "SPUNTINO_POMERIGGIO", foods: [
+          { foodCategory: "FRUTTA", portionType: "main", sortOrder: 0 },
+        ]},
+        { mealType: "CENA", foods: [
+          { foodCategory: "CEREALI", portionType: "carbs_source", sortOrder: 0 },
+          { foodCategory: "CARNE", portionType: "protein_source", sortOrder: 1 },
+        ]},
+      ],
+    },
+    {
+      name: "Low-carb",
+      description: "Riduzione dei carboidrati, enfasi su proteine e grassi buoni.",
+      dietType: "low-carb",
+      pctBreakfast: 0.20, pctLunch: 0.40, pctDinner: 0.30,
+      pctSnack1: 0.05, pctSnack2: 0.05, pctSnack3: 0.0,
+      meals: [
+        { mealType: "COLAZIONE", foods: [
+          { foodCategory: "UOVA_E_ALBUMI", portionType: "protein_source", sortOrder: 0 },
+          { foodCategory: "FRUTTA", portionType: "main", sortOrder: 1 },
+        ]},
+        { mealType: "SPUNTINO_MATTINA", foods: [
+          { foodCategory: "FRUTTA_SECCA", portionType: "fat_source", sortOrder: 0 },
+        ]},
+        { mealType: "PRANZO", foods: [
+          { foodCategory: "CARNE", portionType: "protein_source", sortOrder: 0 },
+          { foodCategory: "VERDURA", portionType: "vegetable", sortOrder: 1 },
+        ]},
+        { mealType: "SPUNTINO_POMERIGGIO", foods: [
+          { foodCategory: "LATTICINI_E_SOSTITUTI", portionType: "protein_source", sortOrder: 0 },
+        ]},
+        { mealType: "CENA", foods: [
+          { foodCategory: "PESCE", portionType: "protein_source", sortOrder: 0 },
+          { foodCategory: "VERDURA", portionType: "vegetable", sortOrder: 1 },
+        ]},
+      ],
+    },
+    {
+      name: "Iperproteica",
+      description: "Elevato apporto proteico su tutti i pasti, indicata per sport di forza.",
+      dietType: "iperproteica",
+      pctBreakfast: 0.17, pctLunch: 0.40, pctDinner: 0.30,
+      pctSnack1: 0.065, pctSnack2: 0.065, pctSnack3: 0.0,
+      meals: [
+        { mealType: "COLAZIONE", foods: [
+          { foodCategory: "UOVA_E_ALBUMI", portionType: "protein_source", sortOrder: 0 },
+          { foodCategory: "CEREALI", portionType: "carbs_source", sortOrder: 1 },
+        ]},
+        { mealType: "SPUNTINO_MATTINA", foods: [
+          { foodCategory: "LATTICINI_E_SOSTITUTI", portionType: "protein_source", sortOrder: 0 },
+        ]},
+        { mealType: "PRANZO", foods: [
+          { foodCategory: "CEREALI", portionType: "carbs_source", sortOrder: 0 },
+          { foodCategory: "CARNE", portionType: "protein_source", sortOrder: 1 },
+        ]},
+        { mealType: "SPUNTINO_POMERIGGIO", foods: [
+          { foodCategory: "LATTICINI_E_SOSTITUTI", portionType: "protein_source", sortOrder: 0 },
+          { foodCategory: "FRUTTA_SECCA", portionType: "fat_source", sortOrder: 1 },
+        ]},
+        { mealType: "CENA", foods: [
+          { foodCategory: "CEREALI", portionType: "carbs_source", sortOrder: 0 },
+          { foodCategory: "PESCE", portionType: "protein_source", sortOrder: 1 },
+        ]},
+      ],
+    },
+    {
+      name: "Vegetariana",
+      description: "Legumi come principale fonte proteica, senza carne e pesce.",
+      dietType: "vegetariana",
+      pctBreakfast: 0.17, pctLunch: 0.45, pctDinner: 0.25,
+      pctSnack1: 0.065, pctSnack2: 0.065, pctSnack3: 0.0,
+      meals: [
+        { mealType: "COLAZIONE", foods: [
+          { foodCategory: "CEREALI", portionType: "carbs_source", sortOrder: 0 },
+          { foodCategory: "LATTICINI_E_SOSTITUTI", portionType: "protein_source", sortOrder: 1 },
+        ]},
+        { mealType: "SPUNTINO_MATTINA", foods: [
+          { foodCategory: "FRUTTA", portionType: "main", sortOrder: 0 },
+        ]},
+        { mealType: "PRANZO", foods: [
+          { foodCategory: "CEREALI", portionType: "carbs_source", sortOrder: 0 },
+          { foodCategory: "LEGUMI_E_PROTEINE_VEGETALI", portionType: "protein_source", sortOrder: 1 },
+        ]},
+        { mealType: "SPUNTINO_POMERIGGIO", foods: [
+          { foodCategory: "FRUTTA_SECCA", portionType: "fat_source", sortOrder: 0 },
+        ]},
+        { mealType: "CENA", foods: [
+          { foodCategory: "LEGUMI_E_PROTEINE_VEGETALI", portionType: "protein_source", sortOrder: 0 },
+          { foodCategory: "CEREALI_ELABORATI", portionType: "carbs_source", sortOrder: 1 },
+        ]},
+      ],
+    },
+  ];
+
+  await prisma.mealPlanTemplate.deleteMany({ where: { professionalId: null } });
+  for (const tpl of systemTemplates) {
+    await prisma.mealPlanTemplate.create({
+      data: {
+        name: tpl.name,
+        description: tpl.description,
+        dietType: tpl.dietType,
+        pctBreakfast: tpl.pctBreakfast,
+        pctLunch: tpl.pctLunch,
+        pctDinner: tpl.pctDinner,
+        pctSnack1: tpl.pctSnack1,
+        pctSnack2: tpl.pctSnack2,
+        pctSnack3: tpl.pctSnack3,
+        meals: {
+          create: tpl.meals.map((meal) => ({
+            mealType: meal.mealType as MealType,
+            foods: {
+              create: meal.foods.map((f) => ({
+                foodCategory: f.foodCategory as FoodCategory,
+                portionType: f.portionType,
+                isFixed: f.isFixed ?? false,
+                sortOrder: f.sortOrder,
+              })),
+            },
+          })),
+        },
+      },
+    });
+  }
+  console.log(`Seeded ${systemTemplates.length} system meal plan templates`);
 }
 
 main()

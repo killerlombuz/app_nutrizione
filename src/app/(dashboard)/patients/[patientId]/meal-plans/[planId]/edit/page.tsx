@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { WizardContainer } from "@/components/meal-plans/wizard/wizard-container";
 import { planToWizardState } from "@/components/meal-plans/wizard/plan-to-state";
+import { getTemplates } from "@/features/meal-plan-templates/actions";
 
 export default async function EditMealPlanPage({
   params,
@@ -30,9 +31,10 @@ export default async function EditMealPlanPage({
   });
   if (!plan) notFound();
 
-  const [activityLevels, sportActivities] = await Promise.all([
+  const [activityLevels, sportActivities, templates] = await Promise.all([
     prisma.activityLevel.findMany({ orderBy: { bmrMultiplier: "asc" } }),
     prisma.sportActivity.findMany({ orderBy: { name: "asc" } }),
+    getTemplates(),
   ]);
 
   const initialState = planToWizardState(plan);
@@ -53,6 +55,7 @@ export default async function EditMealPlanPage({
       activityLevels={activityLevels}
       sportActivities={sportActivities}
       initialState={initialState}
+      templates={templates}
     />
   );
 }
