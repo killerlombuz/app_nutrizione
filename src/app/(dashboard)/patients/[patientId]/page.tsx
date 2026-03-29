@@ -12,10 +12,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DeletePatientButton } from "@/components/patients/delete-patient-button";
+import { PatientGoalsCard } from "@/components/patients/patient-goals-card";
 import { MetricCard } from "@/components/layout/metric-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { TrendLineChart } from "@/components/layout/charts";
 import { PendingLink } from "@/components/navigation/pending-link";
+import { updatePatientGoals } from "@/features/patients/actions";
 import {
   Activity,
   ArrowRight,
@@ -45,6 +47,15 @@ export default async function PatientDetailPage({
 
   if (!patient) notFound();
 
+  const firstVisit = await prisma.visit.findFirst({
+    where: { patientId },
+    orderBy: { date: "asc" },
+    select: {
+      weightKg: true,
+      bodyFatPct: true,
+    },
+  });
+
   const now = new Date();
   const age = patient.birthDate
     ? Math.floor(
@@ -65,6 +76,8 @@ export default async function PatientDetailPage({
       primary: visit.weightKg ? Number(visit.weightKg) : null,
       secondary: visit.bodyFatPct ? Number(visit.bodyFatPct) : null,
     }));
+
+  const updateGoalsAction = updatePatientGoals.bind(null, patientId);
 
   return (
     <div className="space-y-6">
@@ -160,43 +173,15 @@ export default async function PatientDetailPage({
         </Card>
 
         <div className="space-y-6">
-          <Card className="bg-[linear-gradient(180deg,rgba(18,24,26,0.95),rgba(30,37,39,0.98))] text-white">
-            <CardHeader>
-              <CardTitle>Obiettivi clinici</CardTitle>
-              <CardDescription className="text-white/65">
-                Stato rapido ultima visita disponibile.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/70">Peso rilevato</span>
-                  <span>{latestVisit?.weightKg ? `${latestVisit.weightKg} kg` : "-"}</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10">
-                  <div className="h-2 rounded-full bg-emerald-400" style={{ width: "72%" }} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/70">Proteine giornaliere</span>
-                  <span>in target</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10">
-                  <div className="h-2 rounded-full bg-cyan-400" style={{ width: "64%" }} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/70">Idratazione</span>
-                  <span>monitorare</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10">
-                  <div className="h-2 rounded-full bg-amber-300" style={{ width: "38%" }} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <PatientGoalsCard
+            patientName={patient.name}
+            targetWeightKg={patient.targetWeightKg}
+            targetBodyFatPct={patient.targetBodyFatPct}
+            targetNotes={patient.targetNotes}
+            firstVisit={firstVisit}
+            latestVisit={latestVisit}
+            action={updateGoalsAction}
+          />
 
           <Card className="bg-white/[0.78]">
             <CardHeader>

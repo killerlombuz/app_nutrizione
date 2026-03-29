@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { requireProfessionalId } from "@/lib/auth";
 import { patientSchema } from "@/validations/patient";
+import { patientGoalsSchema } from "@/validations/patient-goals";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Gender } from "@/generated/prisma/client";
@@ -77,4 +78,30 @@ export async function deletePatient(patientId: string) {
   revalidatePath("/patients");
   revalidatePath("/");
   redirect("/patients");
+}
+
+export async function updatePatientGoals(patientId: string, formData: FormData) {
+  const professionalId = await requireProfessionalId();
+
+  const raw = Object.fromEntries(formData);
+  const parsed = patientGoalsSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
+  }
+
+  const data = parsed.data;
+
+  await prisma.patient.update({
+    where: { id: patientId, professionalId },
+    data: {
+      targetWeightKg: data.targetWeightKg ?? null,
+      targetBodyFatPct: data.targetBodyFatPct ?? null,
+      targetNotes: data.targetNotes?.trim() ? data.targetNotes.trim() : null,
+    },
+  });
+
+  revalidatePath(`/patients/${patientId}`);
+  revalidatePath("/patients");
+  redirect(`/patients/${patientId}`);
 }
