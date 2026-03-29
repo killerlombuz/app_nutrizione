@@ -11,6 +11,31 @@ const pool = new pg.Pool({
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+type SystemTemplateFood = {
+  foodCategory: FoodCategory;
+  portionType: string;
+  sortOrder: number;
+  isFixed?: boolean;
+};
+
+type SystemTemplateMeal = {
+  mealType: MealType;
+  foods: SystemTemplateFood[];
+};
+
+type SystemTemplate = {
+  name: string;
+  description: string;
+  dietType: string;
+  pctBreakfast: number;
+  pctLunch: number;
+  pctDinner: number;
+  pctSnack1: number;
+  pctSnack2: number;
+  pctSnack3: number;
+  meals: SystemTemplateMeal[];
+};
+
 async function main() {
   // Activity Levels
   const activityLevels = [
@@ -93,7 +118,7 @@ async function main() {
   console.log(`Seeded ${sportActivities.length} sport activities`);
 
   // Meal Plan Templates di sistema
-  const systemTemplates = [
+  const systemTemplates: SystemTemplate[] = [
     {
       name: "Mediterranea",
       description: "Distribuzione classica mediterranea con cereali, pesce e verdure abbondanti.",
