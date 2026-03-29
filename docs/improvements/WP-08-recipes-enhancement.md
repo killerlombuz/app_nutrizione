@@ -109,10 +109,10 @@ Aggiornare `src/features/recipes/actions.ts` per gestire i nuovi campi.
 
 ## Acceptance Criteria
 
-- [ ] Form ricetta mostra campi: immagine, tempi, difficolta', istruzioni, tag
-- [ ] Nuovi campi salvati nel DB
-- [ ] Lista ricette filtrabile per tag e difficolta'
-- [ ] Thumbnail immagine nella tabella ricette
-- [ ] Badge tag nella tabella (es. "VEG", "GF", "LF")
-- [ ] Validazione Zod aggiornata
-- [ ] Ricette esistenti continuano a funzionare (nuovi campi opzionali)
+- [x] Form ricetta mostra campi: immagine, tempi, difficolta', istruzioni, tag
+- [x] Nuovi campi salvati nel DB
+- [x] Lista ricette filtrabile per tag e difficolta'
+- [x] Thumbnail immagine nella tabella ricette
+- [x] Badge tag nella tabella (es. "VEG", "GF", "LF")
+- [x] Validazione Zod aggiornata
+- [x] Ricette esistenti continuano a funzionare (nuovi campi opzionali)

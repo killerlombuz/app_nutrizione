@@ -33,9 +33,9 @@ model Patient {
 Creare `src/components/patients/patient-goals-form.tsx` ("use client"):
 
 - Form compatto (inline o dialog) con:
-  - Peso obiettivo (kg) — input number
-  - Body fat % obiettivo — input number
-  - Note obiettivo — textarea breve
+  - Peso obiettivo (kg) - input number
+  - Body fat % obiettivo - input number
+  - Note obiettivo - textarea breve
   - Bottone "Salva obiettivi"
 
 Server action: `updatePatientGoals(patientId, { targetWeightKg, targetBodyFatPct, targetNotes })`
@@ -48,13 +48,13 @@ Nella pagina `patients/[patientId]/page.tsx`, sotto le metric card, aggiungere u
 +-----------------------------------------------+
 | Obiettivi                          [Modifica]  |
 |                                                |
-| Peso: 82.5 kg → 75.0 kg                       |
+| Peso: 82.5 kg -> 75.0 kg                       |
 | [============================------] 78%       |
 |                                                |
-| Body Fat: 22.3% → 15.0%                        |
+| Body Fat: 22.3% -> 15.0%                       |
 | [=======================---------] 65%          |
 |                                                |
-| "Raggiungere 75kg entro giugno"               |
+| "Raggiungere 75kg entro giugno"                |
 +-----------------------------------------------+
 ```
 
@@ -114,10 +114,10 @@ const patientGoalsSchema = z.object({
 
 ## Acceptance Criteria
 
-- [ ] Professionista puo' impostare peso e BF% target per ogni paziente
-- [ ] Card obiettivi mostra progress bar colorata
-- [ ] Progress calcolato correttamente (prima visita → ultima visita → target)
-- [ ] Se nessun obiettivo, mostra bottone "Imposta obiettivi"
-- [ ] Note obiettivo visibili nella card
-- [ ] Validazione Zod impedisce valori fuori range
-- [ ] Funziona anche se il paziente non ha visite (progress = 0%)
+- [x] Professionista puo' impostare peso e BF% target per ogni paziente
+- [x] Card obiettivi mostra progress bar colorata
+- [x] Progress calcolato correttamente (prima visita -> ultima visita -> target)
+- [x] Se nessun obiettivo, mostra bottone "Imposta obiettivi"
+- [x] Note obiettivo visibili nella card
+- [x] Validazione Zod impedisce valori fuori range
+- [x] Funziona anche se il paziente non ha visite (progress = 0%)
