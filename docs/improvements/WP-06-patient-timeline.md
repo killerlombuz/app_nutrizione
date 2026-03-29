@@ -103,10 +103,10 @@ Le note con `isPinned: true` appaiono sempre in cima alla timeline, indipendente
 
 ## Acceptance Criteria
 
-- [ ] Timeline mostra visite, piani e note in ordine cronologico
-- [ ] Icone e colori distinti per tipo evento
-- [ ] Quick-add nota rapida funzionante
-- [ ] Note pinnate appaiono in cima
-- [ ] Pagina paziente con tab Panoramica / Timeline / Note
-- [ ] Navigazione a dettaglio da ogni evento nella timeline
-- [ ] Nessuna regressione sulla vista panoramica esistente
+- [x] Timeline mostra visite, piani e note in ordine cronologico
+- [x] Icone e colori distinti per tipo evento
+- [x] Quick-add nota rapida funzionante
+- [x] Note pinnate appaiono in cima
+- [x] Pagina paziente con tab Panoramica / Timeline / Note
+- [x] Navigazione a dettaglio da ogni evento nella timeline
+- [x] Nessuna regressione sulla vista panoramica esistente

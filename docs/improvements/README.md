@@ -30,7 +30,7 @@ I file `WP-XX.md` contengono specifiche complete: contesto, file coinvolti, sche
 |----|--------|--------|--------|-----------------|
 | [WP-04](WP-04-meal-plan-templates.md) | Template e auto-suggest meal plan | CC | Alto | wizard/, actions.ts, schema.prisma |
 | [WP-05](WP-05-branded-pdf.md) | Report PDF brandizzato + grafici [x] | CX | Medio | lib/pdf/renderers/, report-generator.tsx |
-| [WP-06](WP-06-patient-timeline.md) | Timeline paziente unificata | CC | Medio | patients/[patientId]/page.tsx, schema.prisma |
+| [WP-06](WP-06-patient-timeline.md) | Timeline paziente unificata [x] | CC | Medio | patients/[patientId]/page.tsx, schema.prisma |
 | [WP-07](WP-07-notifications.md) | Sistema notifiche in-app | CC | Medio | header.tsx, schema.prisma, nuovo componente |
 
 ### P2 - Miglioramenti UX

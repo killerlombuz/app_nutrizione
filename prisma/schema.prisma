@@ -48,10 +48,11 @@ model Patient {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  visits      Visit[]
-  mealPlans   MealPlan[]
-  supplements PatientSupplement[]
-  conditions  PatientCondition[]
+  visits       Visit[]
+  mealPlans    MealPlan[]
+  supplements  PatientSupplement[]
+  conditions   PatientCondition[]
+  patientNotes PatientNote[]
 
   @@index([professionalId])
   @@map("patients")
@@ -371,6 +372,7 @@ model PatientSupplement {
   dosage       String?
   timing       String?
   notes        String?
+  createdAt    DateTime   @default(now())
 
   @@map("patient_supplements")
 }
@@ -383,4 +385,20 @@ model PatientCondition {
   notes         String?
 
   @@map("patient_conditions")
+}
+
+// --- Note cliniche ---
+
+model PatientNote {
+  id        String   @id @default(cuid())
+  patientId String
+  content   String
+  category  String?
+  isPinned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, createdAt])
+  @@map("patient_notes")
 }
