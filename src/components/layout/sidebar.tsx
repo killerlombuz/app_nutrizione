@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import {
   BookOpenText,
+  CalendarDays,
   ChevronRight,
   Database,
   FileSpreadsheet,
@@ -43,7 +44,10 @@ const navGroups = [
   },
   {
     label: "Pazienti",
-    items: [{ href: "/patients", label: "Cartelle cliniche", icon: Users }],
+    items: [
+      { href: "/patients", label: "Cartelle cliniche", icon: Users },
+      { href: "/calendar", label: "Agenda", icon: CalendarDays },
+    ],
   },
   {
     label: "Libreria clinica",

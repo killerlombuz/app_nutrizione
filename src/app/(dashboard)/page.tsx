@@ -15,6 +15,7 @@ import { PendingLink } from "@/components/navigation/pending-link";
 import { FollowUpWidget, type PatientFollowUp } from "@/components/dashboard/follow-up-widget";
 import { ExpiringPlansWidget, type ExpiringPlan } from "@/components/dashboard/expiring-plans-widget";
 import { QuickActions } from "@/components/dashboard/quick-actions";
+import { UpcomingAppointmentsWidget, type UpcomingAppointment } from "@/components/dashboard/upcoming-appointments-widget";
 import {
   Activity,
   CalendarClock,
@@ -48,6 +49,7 @@ export default async function DashboardPage() {
     followUpPatients,
     expiringPlans,
     oldestExpiringPlan,
+    upcomingAppointments,
   ] = await Promise.all([
     prisma.patient.count({ where: { professionalId } }),
 
@@ -156,6 +158,18 @@ export default async function DashboardPage() {
       ORDER BY mp.date ASC
       LIMIT 1
     `,
+
+    // Prossimi appuntamenti
+    prisma.appointment.findMany({
+      where: {
+        professionalId,
+        date: { gte: now },
+        status: { not: "cancelled" },
+      },
+      include: { patient: { select: { id: true, name: true } } },
+      orderBy: [{ date: "asc" }, { startTime: "asc" }],
+      take: 5,
+    }) as Promise<UpcomingAppointment[]>,
   ]);
 
   // Calcolo trend
@@ -370,9 +384,10 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         <FollowUpWidget patients={followUpPatients} />
         <ExpiringPlansWidget plans={expiringPlans} />
+        <UpcomingAppointmentsWidget appointments={upcomingAppointments} />
       </div>
     </div>
   );

@@ -27,6 +27,8 @@ model Professional {
   supplements       Supplement[]
   mealPlanTemplates MealPlanTemplate[]
   notifications     Notification[]
+  appointments      Appointment[]
+  workingHours      WorkingHours[]
 
   @@map("professionals")
 }
@@ -50,11 +52,12 @@ model Patient {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  visits       Visit[]
-  mealPlans    MealPlan[]
-  supplements  PatientSupplement[]
-  conditions   PatientCondition[]
-  patientNotes PatientNote[]
+  visits        Visit[]
+  mealPlans     MealPlan[]
+  supplements   PatientSupplement[]
+  conditions    PatientCondition[]
+  patientNotes  PatientNote[]
+  appointments  Appointment[]
 
   @@index([professionalId])
   @@map("patients")
@@ -452,6 +455,45 @@ model Notification {
 
   @@index([professionalId, isRead, createdAt])
   @@map("notifications")
+}
+
+// --- Scheduling ---
+
+model Appointment {
+  id             String   @id @default(cuid())
+  professionalId String
+  patientId      String?
+  title          String?
+  date           DateTime
+  startTime      String   // "09:00" — HH:mm
+  endTime        String   // "09:30" — HH:mm
+  duration       Int      @default(30) // minuti
+  status         String   @default("scheduled") // "scheduled", "completed", "cancelled", "no_show"
+  type           String?  // "prima_visita", "controllo", "consegna_piano", "altro"
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  patient      Patient?     @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  @@index([professionalId, date])
+  @@index([patientId])
+  @@map("appointments")
+}
+
+model WorkingHours {
+  id             String  @id @default(cuid())
+  professionalId String
+  dayOfWeek      Int     // 0=dom, 1=lun, ..., 6=sab
+  startTime      String  // "09:00"
+  endTime        String  // "18:00"
+  slotDuration   Int     @default(30) // minuti
+  isActive       Boolean @default(true)
+
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@unique([professionalId, dayOfWeek])
+  @@map("working_hours")
 }
 
 // --- Note cliniche ---

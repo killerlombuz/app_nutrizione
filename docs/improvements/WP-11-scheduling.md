@@ -132,10 +132,51 @@ Creare pagina pubblica `/booking/[professionalId]`:
 
 ## Acceptance Criteria
 
-- [ ] Pagina calendario con vista settimanale, mensile, giornaliera
-- [ ] CRUD appuntamenti con dialog
-- [ ] Configurazione orari di lavoro in settings
-- [ ] Voce "Agenda" nella sidebar
-- [ ] Appuntamenti collegati a pazienti
-- [ ] Status tracking (schedulato, completato, cancellato, no-show)
-- [ ] Nessuna sovrapposizione di appuntamenti consentita
+- [x] Pagina calendario con vista settimanale, mensile, giornaliera
+- [x] CRUD appuntamenti con dialog
+- [x] Configurazione orari di lavoro in settings
+- [x] Voce "Agenda" nella sidebar
+- [x] Appuntamenti collegati a pazienti
+- [x] Status tracking (schedulato, completato, cancellato, no-show)
+- [x] Nessuna sovrapposizione di appuntamenti consentita
+
+## Implementazione
+
+**Completato il 2026-03-29.**
+
+### File creati
+
+| File | Descrizione |
+|------|-------------|
+| `prisma/schema.prisma` | Model `Appointment` + `WorkingHours` con relazioni verso `Professional` e `Patient` |
+| `src/validations/appointment.ts` | Schema Zod con validazione HH:mm e status enum |
+| `src/validations/working-hours.ts` | Schema Zod per orari di lavoro |
+| `src/features/appointments/actions.ts` | CRUD: create/update/delete + controllo sovrapposizioni |
+| `src/features/working-hours/actions.ts` | Upsert singolo e bulk per orari di lavoro |
+| `src/components/calendar/types.ts` | Tipi condivisi, costanti colori per tipo/status, griglia oraria |
+| `src/components/calendar/appointment-dialog.tsx` | Dialog creazione/modifica con autocomplete paziente |
+| `src/components/calendar/appointment-card.tsx` | Card colorata per appuntamento in griglia |
+| `src/components/calendar/week-view.tsx` | Vista settimanale 7:00-20:00 con blocchi posizionati |
+| `src/components/calendar/month-view.tsx` | Vista mensile con badge per giorno |
+| `src/components/calendar/day-view.tsx` | Vista giornaliera con dettaglio completo |
+| `src/components/calendar/calendar-shell.tsx` | Orchestratore client: navigazione, viste, dialog |
+| `src/app/(dashboard)/calendar/page.tsx` | Pagina server con fetch per range di date |
+| `src/components/settings/working-hours-form.tsx` | Form interattivo per configurare orari giornalieri |
+| `src/components/dashboard/upcoming-appointments-widget.tsx` | Widget dashboard prossimi 5 appuntamenti |
+
+### File modificati
+
+| File | Modifica |
+|------|----------|
+| `prisma/schema.prisma` | Aggiunte relazioni `appointments` e `workingHours` a `Professional` e `Patient` |
+| `src/components/layout/sidebar.tsx` | Aggiunta voce "Agenda" nel gruppo Pazienti con icona `CalendarDays` |
+| `src/app/(dashboard)/settings/page.tsx` | Aggiunta sezione "Orari di lavoro" con `WorkingHoursForm` |
+| `src/app/(dashboard)/page.tsx` | Aggiunto widget `UpcomingAppointmentsWidget` e query prossimi appuntamenti |
+
+### Note architetturali
+
+- La pagina `/calendar` è un server component che legge `searchParams` (`view`, `date`) e fetcha gli appuntamenti per il range corrente
+- `CalendarShell` è client e usa `router.push` per navigare (cambia URL → re-render del server component con nuovi dati)
+- Il controllo sovrapposizioni avviene lato server nella action `createAppointment`/`updateAppointment`
+- La griglia temporale copre 07:00-20:00 (costanti `GRID_START_HOUR`, `GRID_END_HOUR`, `HOUR_HEIGHT_PX` in `types.ts`)
+- Colori per tipo appuntamento: emerald=prima visita, blue=controllo, amber=consegna piano, violet=altro

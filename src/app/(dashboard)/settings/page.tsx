@@ -8,10 +8,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SettingsForm } from "@/components/settings/settings-form";
+import { WorkingHoursForm } from "@/components/settings/working-hours-form";
 import { updateProfile } from "@/features/settings/actions";
 import { MetricCard } from "@/components/layout/metric-card";
 import { PageHeader } from "@/components/layout/page-header";
-import { BookOpenText, FileChartColumn, Settings, UsersRound } from "lucide-react";
+import { BookOpenText, Clock, FileChartColumn, Settings, UsersRound } from "lucide-react";
 
 export default async function SettingsPage() {
   const professionalId = await requireProfessionalId();
@@ -24,7 +25,7 @@ export default async function SettingsPage() {
     return <p>Professionista non trovato.</p>;
   }
 
-  const [patientCount, foodCount, recipeCount, planCount] = await Promise.all([
+  const [patientCount, foodCount, recipeCount, planCount, workingHours] = await Promise.all([
     prisma.patient.count({ where: { professionalId } }),
     prisma.food.count({
       where: { OR: [{ professionalId }, { professionalId: null }] },
@@ -32,6 +33,10 @@ export default async function SettingsPage() {
     prisma.recipe.count({ where: { professionalId } }),
     prisma.mealPlan.count({
       where: { patient: { professionalId } },
+    }),
+    prisma.workingHours.findMany({
+      where: { professionalId },
+      orderBy: { dayOfWeek: "asc" },
     }),
   ]);
 
@@ -107,6 +112,7 @@ export default async function SettingsPage() {
           />
         </div>
 
+        <div className="space-y-6">
         <Card className="bg-white/[0.78]">
           <CardHeader>
             <CardTitle>Profilo professionista</CardTitle>
@@ -149,6 +155,30 @@ export default async function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        <Card className="bg-white/[0.78]">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Clock className="size-4 text-muted-foreground" />
+              <CardTitle>Orari di lavoro</CardTitle>
+            </div>
+            <CardDescription>
+              Configura i giorni e gli orari in cui ricevi appuntamenti. Gli slot determinano la durata predefinita di ogni appuntamento.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WorkingHoursForm
+              initialValues={workingHours.map((wh) => ({
+                dayOfWeek: wh.dayOfWeek,
+                startTime: wh.startTime,
+                endTime: wh.endTime,
+                slotDuration: wh.slotDuration,
+                isActive: wh.isActive,
+              }))}
+            />
+          </CardContent>
+        </Card>
+        </div>
       </div>
     </div>
   );
